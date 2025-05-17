@@ -1,0 +1,4 @@
+# Node.js (frontend)
+pantry-frontend/node_modules/
+pantry-frontend/.vite/
+pantry-frontend/dist/
