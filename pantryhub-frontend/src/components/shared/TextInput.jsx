@@ -12,5 +12,4 @@ export default function TextInput({ label, name, value, onChange, type = "text",
         />
       </div>
     );
-  }
-  
+  }  
