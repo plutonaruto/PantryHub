@@ -1,4 +1,4 @@
-import TextInput from "../src/shared/TextInput";
+import TextInput from "../shared/TextInput";
 
 export default function ItemForm({formData, onChange, onSubmit}) {
     return (
