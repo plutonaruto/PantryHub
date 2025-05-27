@@ -11,7 +11,7 @@ export default function Marketplace() {
       <MarketplaceForm formData={formData} onChange={updateForm} onSubmit={addItem} />
       <div className="grid grid-cols-3 gap-4">
         {items.map((item, i) => (
-          <MarketplaceItemCard key={i} item={item} onClaim={() => claimItem(i)} />
+          <MarketplaceItemCard key={i} item={item} onClaim={(qty) => claimItem(i, qty)} />
         ))}
       </div>
     </div>
