@@ -3,18 +3,16 @@ import { useState } from 'react';
 export function useMarketplace() {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({ name: '', description: '', expiry: '' , quantity: 1, image: null});
-  const [imagePreview, setImagePreview] = useState(null);
 
   const addItem = (e) => {
     e.preventDefault();
     const newItem = { 
       ...formData, 
       quantity: parseInt(formData.quantity, 10),
-      imageUrl: imagePreview, //temporary display
+      imageUrl: formData.image ? URL.createObjectURL(formData.image) : null
     };
     setItems([...items, newItem]);
     setFormData({ name: '', description: '', expiry: '', quantity: 1, image: null});
-    setImagePreview(null);
   };
 
   const updateForm = (e) => {
@@ -26,7 +24,6 @@ export function useMarketplace() {
     const file = e.target.files[0];
     if (file) {
       setFormData((prev) => ({ ...prev, image: file }));
-      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -39,5 +36,5 @@ export function useMarketplace() {
     setItems(updated);
   };
 
-  return { items, formData, addItem, updateForm, claimItem, onImageChange, imagePreview };
+  return { items, formData, addItem, updateForm, claimItem, onImageChange };
 }
