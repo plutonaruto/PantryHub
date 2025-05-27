@@ -2,20 +2,32 @@ import { useState } from 'react';
 
 export function useMarketplace() {
   const [items, setItems] = useState([]);
-  const [formData, setFormData] = useState({ name: '', description: '', expiry: '' , quantity: 1}); //default quantity that can be changed
+  const [formData, setFormData] = useState({ name: '', description: '', expiry: '' , quantity: 1, image: null});
+  const [imagePreview, setImagePreview] = useState(null);
 
   const addItem = (e) => {
     e.preventDefault();
     const newItem = { 
       ...formData, 
-      quantity: parseInt(formData.quantity, 10)
+      quantity: parseInt(formData.quantity, 10),
+      imageUrl: imagePreview, //temporary display
     };
     setItems([...items, newItem]);
-    setFormData({ name: '', description: '', expiry: '', quantity: 1});
+    setFormData({ name: '', description: '', expiry: '', quantity: 1, image: null});
+    setImagePreview(null);
   };
 
   const updateForm = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, image: file }));
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const claimItem = (index, quantityToClaim) => {
@@ -27,5 +39,5 @@ export function useMarketplace() {
     setItems(updated);
   };
 
-  return { items, formData, addItem, updateForm, claimItem };
+  return { items, formData, addItem, updateForm, claimItem, onImageChange, imagePreview };
 }
