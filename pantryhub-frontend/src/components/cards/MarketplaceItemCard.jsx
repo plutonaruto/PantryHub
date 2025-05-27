@@ -2,13 +2,24 @@ import { useState } from 'react';
 
 export default function MarketplaceItemCard({ item, onClaim }) {
   const [claimQty, setClaimQty] = useState(1);
+  const [warning, setWarning] = useState('');
+
+  //restrict claimQty to max quantity available
+  const handleQuantityChange = (e) => { 
+    const newQty = parseInt(e.target.value);
+    if (newQty > item.quantity) {
+      setWarning(`Only ${item.quantity} items available.`);
+    } else {
+      setWarning('');
+    }
+
+    setClaimQty(newQty);
+  };
 
   const handleClaim = () => {
-    const quantityToClaim = Math.min(claimQty, item.quantity);
-    if (quantityToClaim > 0) {
-      onClaim(quantityToClaim);
-      setClaimQty(1);
-    }
+    if (claimQty > item.quantity || claimQty < 1) return;
+    onClaim(claimQty);
+    setClaimQty(1);
   };
 
   return (
@@ -21,18 +32,28 @@ export default function MarketplaceItemCard({ item, onClaim }) {
       <div className="flex items-center mt-2">
         <input
           type="number"
+          min="1"
+          max={item.quantity}
           value={claimQty}
-          onChange={(e) => setClaimQty(e.target.value)}
-          className="w-16 p-1 border rounded"
+          onChange={handleQuantityChange}
+          className="w-16 p-1 border text-center"
        />
        <button 
           onClick={handleClaim} 
           className="bg-blue-500 text-white px-3 py-1 rounded"
+          disabled={claimQty < 1 || claimQty > item.quantity}
         >
           Claim
         </button>
       </div>
+
+      {warning && (
+        <p className="text-red-500 text-sm mt-1">
+          {warning}
+        </p>
+      )}
     </div>
   );
 }
+
   
