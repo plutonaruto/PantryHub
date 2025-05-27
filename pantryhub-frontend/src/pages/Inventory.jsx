@@ -3,7 +3,7 @@ import ItemCard from '../components/cards/ItemCard';
 import { useInventory } from '../hooks/useInventory';
 
 export default function Inventory() {
-  const { items, formData, addItem, updateForm, setItems } = useInventory();
+  const { items, formData, addItem, updateForm, setItems, onImageChange} = useInventory();
 
   const adjustQty = (index, delta) => {
     const updated = [...items];
@@ -14,7 +14,12 @@ export default function Inventory() {
   return (
     <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Inventory</h1>
-        <ItemForm formData={formData} onChange={updateForm} onSubmit={addItem} />
+        <ItemForm 
+          formData={formData} 
+          onChange={updateForm} 
+          onSubmit={addItem} 
+          onImageChange={onImageChange}
+        />
         <div className="grid grid-cols-4 gap-4">
             {items.map((item, i) => (
             <ItemCard
