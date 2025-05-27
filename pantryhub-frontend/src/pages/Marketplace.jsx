@@ -3,12 +3,12 @@ import MarketplaceItemCard from '../components/cards/MarketplaceItemCard';
 import { useMarketplace } from '../hooks/useMarketplace';
 
 export default function Marketplace() {
-  const { items, formData, addItem, updateForm, claimItem, onImageChange, imagePreview } = useMarketplace();
+  const { items, formData, addItem, updateForm, claimItem, onImageChange} = useMarketplace();
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Marketplace</h1>
-      <MarketplaceForm formData={formData} onChange={updateForm} onSubmit={addItem} onImageChange={onImageChange} imagePreview={imagePreview}/>
+      <MarketplaceForm formData={formData} onChange={updateForm} onSubmit={addItem} onImageChange={onImageChange}/>
       <div className="grid grid-cols-3 gap-4">
         {items.map((item, i) => (
           <MarketplaceItemCard key={i} item={item} onClaim={(qty) => claimItem(i, qty)} />
