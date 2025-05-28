@@ -108,7 +108,7 @@ def get(item_name):
     })
 
 #delete an item
-@app.route('/items/<int:item_id>', methods=['PATCH'])
+@app.route('/items/<int:item_id>', methods=['DELETE'])
 def delete(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -171,7 +171,7 @@ def create_marketitem():
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
 #patch an item
-@app.route('/marketplace/<int:item_id>', methods=['PATCH'])
+@app.route('/marketplace/<int:market_item_id>', methods=['PATCH'])
 def patch(market_item_id):
     market_item = MarketplaceItem.query.get(market_item_id)
     if not market_item:
