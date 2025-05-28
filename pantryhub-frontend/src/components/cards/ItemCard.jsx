@@ -11,7 +11,7 @@ export default function ItemCard({ item, onIncrement, onDecrement }) {
         />
       )}
       <h3 className="font-bold">{item.name}</h3>
-      <p>Expiry: {item.expiry}</p>
+      <p>Expiry: {item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : 'N/A'}</p>
       <QuantityControl value={item.quantity} onIncrement={onIncrement} onDecrement={onDecrement} />
     </div>
   );
