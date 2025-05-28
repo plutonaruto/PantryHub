@@ -1,18 +1,39 @@
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 export function useInventory() {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({ name: '', expiry: '', quantity: 1, image: null });
 
-  const addItem = (e) => {
+  const fetchItems = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/items");
+      setItems(res.data);
+    } catch (err) {
+      console.error("Error fetching items:", err);
+    }
+  };
+
+  const addItem = async (e) => {
     e.preventDefault();
-    const newItem = {
-      ...formData,
+    const payload = {
+      name: formData.name,
+      expiry_date: formData.expiry,
+      room_no: "101", //dummy room no.
+      owner_id: 1, //dummy id
+      pantry_id: 1, //dummy id
       quantity: parseInt(formData.quantity, 10),
-      imageUrl: formData.image ? URL.createObjectURL(formData.image) : null
+      imageUrl: null
     };
-    setItems([...items, newItem]);
-    setFormData({ name: '', expiry: '', quantity: 1, image: null });
+  
+    try {
+      await axios.post("http://localhost:5000/items", payload);
+      const res = await axios.get("http://localhost:5000/items");
+      setItems(res.data);
+      setFormData({ name: '', expiry: '', quantity: 1, image: null });
+    } catch (err) {
+      console.error("Failed to post item to backend:", err);
+    }
   };
 
   const updateForm = (e) => {
@@ -26,6 +47,12 @@ export function useInventory() {
       setFormData(prev => ({ ...prev, image: file }));
     }
   };
+
+  useEffect(() => {
+    axios.get("http://localhost:5000/items")
+      .then((res) => setItems(res.data))
+      .catch((err) => console.error("Failed to fetch items:", err));
+  }, []);
 
   return { items, formData, addItem, updateForm, onImageChange, setItems };
 }
