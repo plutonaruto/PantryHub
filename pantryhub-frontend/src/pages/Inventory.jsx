@@ -7,8 +7,11 @@ export default function Inventory() {
 
   const adjustQty = (index, delta) => {
     const updated = [...items];
-    updated[index].quantity = Math.max(0, Number(updated[index].quantity) + delta);
-    setItems(updated);
+    const currentQty = Number(updated[index].quantity);
+    const newQty = Math.max(0, currentQty + delta);
+
+    updated[index].quantity = newQty;
+    setItems(updated.filter(item => item.quantity > 0)); // remove when 0
   };
 
   return (
