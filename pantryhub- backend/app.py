@@ -20,6 +20,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 CORS(app)
 
+UPLOADED_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOADED_FOLDER'] = UPLOADED_FOLDER
+app.config['MAX_PHOTO_SIZE'] = 16 * 1024 * 1024
+
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql+psycopg2://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}"
     f"@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
@@ -29,6 +34,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app) #interact with ur database
 migrate = Migrate(app, db) #for any future changes
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Inventory table
 class Item(db.Model):
@@ -72,33 +80,39 @@ with app.app_context():
 #create new post
 @app.route('/items', methods=['POST'])
 def create():
-    data = request.get_json()
-    print("Received JSON:", data) # debugging
+    data = request.form.to_dict()
+    print("Received FORM:", data)
+    file = request.files.get('image')
+
+    if not file or not allowed_file(file.filename):
+        return jsonify({"error": "Invalid or missing image"}), 400
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
+    
+    filename = secure_filename(file.filename)
+    image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
+    file.save(image_path)
 
     try:
         item = Item(
             name=data['name'],
             quantity=data.get('quantity', 1),
+            image_url = image_path,
             room_no=data['room_no'],
             owner_id=data['owner_id'],
             pantry_id=data['pantry_id'],
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
-            created_at=datetime.utcnow(),
-            image_url=data.get('imageUrl')
+            created_at=datetime.utcnow()
         )
         db.session.add(item)
         db.session.commit()
         return jsonify({"message": "Item created successfully", "id": item.id}), 201
 
     except Exception as e:
-        print("Error during item creation:", e) # debugging
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
-#get a post
 @app.route('/items/<string:item_name>', methods=['GET'])
 def get(item_name):
     item = Item.query.get(item_name)
@@ -112,7 +126,7 @@ def get(item_name):
         "room_no": item.room_no,
         "owner_id": item.owner_id,
         "pantry_id": item.pantry_id,
-        "imageUrl": item.image_url,
+        "image_url": item.image_url,
         "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None
     })
 
@@ -157,11 +171,11 @@ def get_all_items():
             "id": item.id,
             "name": item.name,
             "quantity": item.quantity,
+            "image_url": item.image_url,
             "room_no": item.room_no,
             "owner_id": item.owner_id,
             "pantry_id": item.pantry_id,
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
-            "imageUrl": item.image_url
         })
     return jsonify(result), 200
 
@@ -171,11 +185,20 @@ def get_all_items():
 #create new post
 @app.route('/marketplace', methods=['POST'])
 def create_marketitem():
-    data = request.get_json()
+    data = request.form.to_dict()
+    print("Received FORM:", data)
+    file = request.files.get('image')
 
-    required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date', 'description']
+    if not file or not allowed_file(file.filename):
+        return jsonify({"error": "Invalid or missing image"}), 400
+
+    required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
+    
+    filename = secure_filename(file.filename)
+    image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
+    file.save(image_path)
 
     try:
         market_item = MarketplaceItem(
@@ -184,6 +207,7 @@ def create_marketitem():
             room_no=data['room_no'],
             owner_id=data['owner_id'],
             pantry_id=data['pantry_id'],
+            image_url = image_path,
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
             created_at=datetime.utcnow(),
             description=data['description'], #db for item has no descr how to add it here
@@ -218,6 +242,8 @@ def patch(market_item_id):
         market_item.owner_id = data['owner_id']
     if 'pantry_id' in data:
         market_item.pantry_id = data['pantry_id']
+    if 'image_url' in data:
+        market_item.image_url = data['image_url']
     if 'expiry_date' in data:
         market_item.expiry_date = datetime.strptime(data['expiry_date'], '%Y-%m-%d').date()
     if 'description' in data:
