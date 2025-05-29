@@ -14,6 +14,26 @@ export function useInventory() {
     }
   };
 
+  const adjustQty = async (index, delta) => {
+    const updated = [...items];
+    const item = updated[index];
+    const currentQty = Number(item.quantity);
+    const newQty = Math.max(0, currentQty + delta);
+  
+    if (newQty === 0) {
+      try {
+        await axios.patch(`http://localhost:5000/items/${item.id}`);
+        updated.splice(index, 1);
+        setItems(updated);
+      } catch (err) {
+        console.error("Failed to delete item:", err);
+      }
+    } else {
+      item.quantity = newQty;
+      setItems(updated);
+    }
+  };
+
   const addItem = async (e) => {
     e.preventDefault();
     const payload = {
@@ -23,13 +43,12 @@ export function useInventory() {
       owner_id: 1, //dummy id
       pantry_id: 1, //dummy id
       quantity: parseInt(formData.quantity, 10),
-      imageUrl: null
+      imageUrl: "https://via.placeholder.com/100"
     };
   
     try {
       await axios.post("http://localhost:5000/items", payload);
-      const res = await axios.get("http://localhost:5000/items");
-      setItems(res.data);
+      await fetchItems();
       setFormData({ name: '', expiry: '', quantity: 1, image: null });
     } catch (err) {
       console.error("Failed to post item to backend:", err);
@@ -49,10 +68,8 @@ export function useInventory() {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:5000/items")
-      .then((res) => setItems(res.data))
-      .catch((err) => console.error("Failed to fetch items:", err));
+    fetchItems();
   }, []);
 
-  return { items, formData, addItem, updateForm, onImageChange, setItems };
+  return { items, formData, addItem, updateForm, onImageChange, setItems, adjustQty, fetchItems };
 }

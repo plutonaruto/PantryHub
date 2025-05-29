@@ -3,16 +3,7 @@ import ItemCard from '../components/cards/ItemCard';
 import { useInventory } from '../hooks/useInventory';
 
 export default function Inventory() {
-  const { items, formData, addItem, updateForm, setItems, onImageChange} = useInventory();
-
-  const adjustQty = (index, delta) => {
-    const updated = [...items];
-    const currentQty = Number(updated[index].quantity);
-    const newQty = Math.max(0, currentQty + delta);
-
-    updated[index].quantity = newQty;
-    setItems(updated.filter(item => item.quantity > 0)); // remove when 0
-  };
+  const { items, formData, addItem, updateForm, setItems, onImageChange, adjustQty} = useInventory();
 
   return (
     <div className="p-6">
