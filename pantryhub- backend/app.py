@@ -211,7 +211,9 @@ def create_marketitem():
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
             created_at=datetime.utcnow(),
             description=data['description'], #db for item has no descr how to add it here
+            image_url=data.get('imageUrl'),
             claimed=False
+            
         )
         db.session.add(market_item)
         db.session.commit()
@@ -248,10 +250,37 @@ def patch(market_item_id):
         market_item.expiry_date = datetime.strptime(data['expiry_date'], '%Y-%m-%d').date()
     if 'description' in data:
         market_item.description = data['description']
+    if 'claimed' in data:
+        market_item.claimed = data['claimed']
+    if 'imageUrl' in data:
+        market_item.image_url = data['imageUrl']
+    if market_item.quantity == 0:
+        db.session.delete(market_item)
 
     db.session.commit()
     
     return jsonify({"message": f"Item {market_item.id} updated"})
+
+#fetch all items
+@app.route('/marketplace', methods=['GET'])
+def get_marketplace_items():
+    items = MarketplaceItem.query.filter_by(claimed=False).all() #fetch unclaimed only
+    result = []
+    for item in items:
+        result.append({
+            "id": item.id,
+            "name": item.name,
+            "quantity": item.quantity,
+            "room_no": item.room_no,
+            "owner_id": item.owner_id,
+            "pantry_id": item.pantry_id,
+            "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
+            "description": item.description,
+            "imageUrl": item.image_url,
+            "claimed": item.claimed
+        })
+    return jsonify(result), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)

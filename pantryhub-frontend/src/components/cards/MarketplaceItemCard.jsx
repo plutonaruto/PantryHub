@@ -29,7 +29,7 @@ export default function MarketplaceItemCard({ item, onClaim }) {
       )}
       <h3 className="font-bold">{item.name}</h3>
       <p className="text-sm italic text-gray-600">{item.description}</p>
-      <p className="text-sm">Expires: {item.expiry}</p>
+      <p className="text-sm">Expires: {item.expiry_date}</p>
       <p className="text-sm font-medium">Available: {item.quantity}</p>
 
       <div className="flex items-center mt-2">

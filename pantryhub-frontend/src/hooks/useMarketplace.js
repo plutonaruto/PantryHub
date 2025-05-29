@@ -1,19 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export function useMarketplace() {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({ name: '', description: '', expiry: '' , quantity: 1, image: null});
 
-  const addItem = (e) => {
-    e.preventDefault();
-    const newItem = { 
-      ...formData, 
-      quantity: parseInt(formData.quantity, 10),
-      imageUrl: formData.image ? URL.createObjectURL(formData.image) : null
-    };
-    setItems([...items, newItem]);
-    setFormData({ name: '', description: '', expiry: '', quantity: 1, image: null});
+  const fetchItems = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/marketplace");
+      setItems(res.data);
+    } catch (err) {
+      console.error("Error fetching items:", err);
+    }
   };
+
+  const addItem = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      name: formData.name,
+      description: formData.description,
+      expiry_date: formData.expiry,
+      quantity: parseInt(formData.quantity, 10),
+      room_no: "101",  // Dummy or from auth
+      owner_id: 1,
+      pantry_id: 1,
+      imageUrl: null  // or send a real URL later
+    };
+
+    try {
+      await axios.post("http://localhost:5000/marketplace", payload);
+      await fetchItems();
+      setFormData({ name: '', description: '', expiry: '', quantity: 1, image: null });
+    } catch (err) {
+      console.error("Failed to post marketplace item:", err);
+    }
+  };
+
 
   const updateForm = (e) => {
     const { name, value } = e.target;
@@ -27,14 +50,42 @@ export function useMarketplace() {
     }
   };
 
-  const claimItem = (index, quantityToClaim) => {
-    const updated = [...items];
-    updated[index].quantity -= quantityToClaim;
-    if (updated[index].quantity <= 0) {
-      updated.splice(index, 1); // remove the item if none left
+  const claimItem = async (index, quantityToClaim) => {
+    const item = items[index];
+    const remainingQty = item.quantity - quantityToClaim;
+
+    if (remainingQty <= 0) {
+      try {
+        await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
+          quantity: 0,
+          claimed: true
+        });
+        const updated = [...items];
+        updated.splice(index, 1);
+        setItems(updated);
+      } catch (err) {
+        console.error("Failed to mark item as claimed:", err);
+      }
+    } else {
+      try {
+        await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
+          quantity: remainingQty
+        });
+        const updated = [...items];
+        updated[index].quantity = remainingQty;
+        setItems(updated);
+      } catch (err) {
+        console.error("Failed to decrement item:", err);
+      }
     }
-    setItems(updated);
   };
 
-  return { items, formData, addItem, updateForm, claimItem, onImageChange };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+
+
+  return { items, formData, addItem, updateForm, claimItem, onImageChange, fetchItems };
 }
