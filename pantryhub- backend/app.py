@@ -10,6 +10,9 @@ from flask_cors import CORS
 
 from sqlalchemy.sql import func
 
+from flask_migrate import Migrate
+
+
 load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -25,6 +28,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app) #interact with ur database
+migrate = Migrate(app, db) #for any future changes
 
 # Inventory table
 class Item(db.Model):
@@ -36,6 +40,7 @@ class Item(db.Model):
     pantry_id = db.Column(db.Integer, nullable=False)
     expiry_date = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    image_url = db.Column(db.String, nullable=True)
     #bio = db.Column(db.Text) #need this for selling items?
 
     def __repr__(self): # for debugging
@@ -50,6 +55,7 @@ class MarketplaceItem(db.Model):
     owner_id = db.Column(db.Integer, nullable=False)
     pantry_id = db.Column(db.Integer, nullable=False)
     expiry_date = db.Column(db.Date, nullable=True)
+    image_url = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     description = db.Column(db.Text, nullable=True)
     claimed = db.Column(db.Boolean, default=False)
@@ -67,7 +73,7 @@ with app.app_context():
 @app.route('/items', methods=['POST'])
 def create():
     data = request.get_json()
-    print("Received JSON:", data)
+    print("Received JSON:", data) # debugging
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
     if not all(field in data for field in required_fields):
@@ -81,13 +87,15 @@ def create():
             owner_id=data['owner_id'],
             pantry_id=data['pantry_id'],
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
+            image_url=data.get('imageUrl')
         )
         db.session.add(item)
         db.session.commit()
         return jsonify({"message": "Item created successfully", "id": item.id}), 201
 
     except Exception as e:
+        print("Error during item creation:", e) # debugging
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
 #get a post
@@ -104,6 +112,7 @@ def get(item_name):
         "room_no": item.room_no,
         "owner_id": item.owner_id,
         "pantry_id": item.pantry_id,
+        "imageUrl": item.image_url,
         "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None
     })
 
@@ -132,7 +141,8 @@ def get_all_items():
             "room_no": item.room_no,
             "owner_id": item.owner_id,
             "pantry_id": item.pantry_id,
-            "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None
+            "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
+            "imageUrl": item.image_url
         })
     return jsonify(result), 200
 
