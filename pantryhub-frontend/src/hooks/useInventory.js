@@ -17,20 +17,23 @@ export function useInventory() {
   const adjustQty = async (index, delta) => {
     const updated = [...items];
     const item = updated[index];
-    const currentQty = Number(item.quantity);
+    const currentQty = parseInt(item.quantity, 10);
     const newQty = Math.max(0, currentQty + delta);
   
-    if (newQty === 0) {
-      try {
-        await axios.patch(`http://localhost:5000/items/${item.id}`);
-        updated.splice(index, 1);
-        setItems(updated);
-      } catch (err) {
-        console.error("Failed to delete item:", err);
+    try {
+      if (newQty === 0) {
+          await axios.delete(`http://localhost:5000/items/${item.id}`);
+          updated.splice(index, 1);
+        } else {
+        await axios.put(`http://localhost:5000/items/${item.id}`, {
+          quantity: newQty
+        });
+        updated[index].quantity = newQty;
       }
-    } else {
-      item.quantity = newQty;
-      setItems(updated);
+
+    setItems(updated);
+    } catch (err) {
+    console.error("Failed to update item:", err);
     }
   };
 

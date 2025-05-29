@@ -128,6 +128,25 @@ def delete(item_id):
 
     return jsonify({"message": f"Item {item.id} deleted."})
 
+#update qty of item
+@app.route('/items/<int:item_id>', methods=['PUT'])
+def update_quantity(item_id):
+    item = Item.query.get(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    data = request.get_json()
+    new_qty = data.get('quantity')
+
+    if new_qty is None or not isinstance(new_qty, int) or new_qty < 0:
+        return jsonify({"error": "Invalid quantity"}), 400
+
+    item.quantity = new_qty
+    db.session.commit()
+
+    return jsonify({"message": "Quantity updated", "quantity": item.quantity}), 200
+
+
 #fetch all items
 @app.route('/items', methods=['GET'])
 def get_all_items():
