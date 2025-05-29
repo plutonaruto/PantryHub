@@ -25,10 +25,10 @@ export function useInventory() {
           await axios.delete(`http://localhost:5000/items/${item.id}`);
           updated.splice(index, 1);
         } else {
-        await axios.put(`http://localhost:5000/items/${item.id}`, {
+          await axios.put(`http://localhost:5000/items/${item.id}`, {
           quantity: newQty
         });
-        updated[index].quantity = newQty;
+        item.quantity = newQty;
       }
 
     setItems(updated);
