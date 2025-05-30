@@ -7,10 +7,13 @@ from base import Base
 from sqlalchemy import Column, Integer, String, DateTime 
 from models import Item # Ensure the Item model is imported
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 
 from sqlalchemy.sql import func
 
 from flask_migrate import Migrate
+
+from flask import send_from_directory
 
 
 load_dotenv()
@@ -37,6 +40,11 @@ migrate = Migrate(app, db) #for any future changes
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+#expose uploads/ as static route
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOADED_FOLDER'], filename)
 
 # Inventory table
 class Item(db.Model):
@@ -186,31 +194,33 @@ def get_all_items():
 @app.route('/marketplace', methods=['POST'])
 def create_marketitem():
     data = request.form.to_dict()
-    print("Received FORM:", data)
     file = request.files.get('image')
 
-    if not file or not allowed_file(file.filename):
-        return jsonify({"error": "Invalid or missing image"}), 400
+    #optional image handling
+    image_path = None
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
+        file.save(image_path)
+        image_path = f"/uploads/{filename}" #create url
+
+    image_url = f"/uploads/{filename}" if file and allowed_file(file.filename) else None
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
-    if not all(field in data for field in required_fields):
+    if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
-    
-    filename = secure_filename(file.filename)
-    image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
-    file.save(image_path)
 
     try:
         market_item = MarketplaceItem(
             name=data['name'],
-            quantity=data.get('quantity', 1),
+            quantity=int(data.get('quantity', 1)),
             room_no=data['room_no'],
-            owner_id=data['owner_id'],
-            pantry_id=data['pantry_id'],
-            image_url = image_path,
+            owner_id=int(data['owner_id']),
+            pantry_id=int(data['pantry_id']),
+            image_url = image_path, 
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
             created_at=datetime.utcnow(),
-            description=data['description'], #db for item has no descr how to add it here
+            description=data.get('description', ''), #use .get in case its missing
             claimed=False
             
         )
@@ -222,6 +232,7 @@ def create_marketitem():
             "id": market_item.id}), 201
 
     except Exception as e:
+        print("Exception while creating item:", str(e)) #debugging purposes
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
 #patch an item

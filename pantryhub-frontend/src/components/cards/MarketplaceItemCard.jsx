@@ -25,7 +25,7 @@ export default function MarketplaceItemCard({ item, onClaim }) {
   return (
     <div className="p-4 border rounded bg-gray-50 shadow">
       {item.imageUrl && (
-        <img src={item.imageUrl} alt={item.name} className="w-full h-32 object-cover rounded mb-2" />
+        <img srcsrc={`http://localhost:5000/${item.imageUrl}`} alt={item.name} className="w-full h-32 object-cover rounded mb-2" />
       )}
       <h3 className="font-bold">{item.name}</h3>
       <p className="text-sm italic text-gray-600">{item.description}</p>

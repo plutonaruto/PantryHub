@@ -17,25 +17,32 @@ export function useMarketplace() {
   const addItem = async (e) => {
     e.preventDefault();
 
-    const payload = {
-      name: formData.name,
-      description: formData.description,
-      expiry_date: formData.expiry,
-      quantity: parseInt(formData.quantity, 10),
-      room_no: "101",  // Dummy or from auth
-      owner_id: 1,
-      pantry_id: 1,
-      imageUrl: null  // or send a real URL later
-    };
+    const form = new FormData();
+    form.append("name", formData.name);
+    form.append("description", formData.description);
+    form.append("expiry_date", formData.expiry);
+    form.append("quantity", formData.quantity);
+    form.append("room_no", "101"); //dummy still
+    form.append("owner_id", 1);
+    form.append("pantry_id", 1);
+    
+    if (formData.image) {
+    form.append("image", formData.image);
+    }
 
     try {
-      await axios.post("http://localhost:5000/marketplace", payload);
+      await axios.post("http://localhost:5000/marketplace", form, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
       await fetchItems();
       setFormData({ name: '', description: '', expiry: '', quantity: 1, image: null });
     } catch (err) {
-      console.error("Failed to post marketplace item:", err);
+      console.error("Failed to post marketplace item:", err.response?.data || err.message);
     }
-  };
+};
+
 
 
   const updateForm = (e) => {
