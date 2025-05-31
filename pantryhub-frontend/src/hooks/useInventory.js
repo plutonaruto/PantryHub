@@ -14,44 +14,29 @@ export function useInventory() {
     }
   };
 
-  const adjustQty = async (index, delta) => {
-    const updated = [...items];
-    const item = updated[index];
-    const currentQty = parseInt(item.quantity, 10);
-    const newQty = Math.max(0, currentQty + delta);
-  
-    try {
-      if (newQty === 0) {
-          await axios.delete(`http://localhost:5000/items/${item.id}`);
-          updated.splice(index, 1);
-        } else {
-          await axios.put(`http://localhost:5000/items/${item.id}`, {
-          quantity: newQty
-        });
-        item.quantity = newQty;
-      }
-
-    setItems(updated);
-    } catch (err) {
-    console.error("Failed to update item:", err);
-    }
-  };
-
   const addItem = async (e) => {
     e.preventDefault();
-    const payload = {
-      name: formData.name,
-      expiry_date: formData.expiry,
-      room_no: "101", //dummy room no.
-      owner_id: 1, //dummy id
-      pantry_id: 1, //dummy id
-      quantity: parseInt(formData.quantity, 10),
-      imageUrl: "https://via.placeholder.com/100"
-    };
+
+    const formData = new FormData;
+
+    formDataToSend.append('name', formData.name);
+    formDataToSend.append('expiry_date', formData.expiry);
+    formDataToSend.append('quantity', formData.quantity);
+    formDataToSend.append('room_no', "101");  // dummy data for room_no
+    formDataToSend.append('owner_id', 1);     // dummy data for owner_id
+    formDataToSend.append('pantry_id', 1);    // dummy data for pantry_id
+
+    
   
     try {
-      await axios.post("http://localhost:5000/items", payload);
-      await fetchItems();
+      await axios.post("http://localhost:5000/items", formDataToSend, {
+        headers: {
+            "Content-Type": "multipart/form-data",  // Required for file uploads
+        }
+
+      });
+      const res = await axios.get("http://localhost:5000/items");
+      setItems(res.data);
       setFormData({ name: '', expiry: '', quantity: 1, image: null });
     } catch (err) {
       console.error("Failed to post item to backend:", err);
@@ -71,8 +56,10 @@ export function useInventory() {
   };
 
   useEffect(() => {
-    fetchItems();
+    axios.get("http://localhost:5000/items")
+      .then((res) => setItems(res.data))
+      .catch((err) => console.error("Failed to fetch items:", err));
   }, []);
 
-  return { items, formData, addItem, updateForm, onImageChange, setItems, adjustQty, fetchItems };
+  return { items, formData, addItem, updateForm, onImageChange, setItems };
 }
