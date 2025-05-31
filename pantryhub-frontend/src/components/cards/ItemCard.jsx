@@ -5,7 +5,7 @@ export default function ItemCard({ item, onIncrement, onDecrement }) {
     <div className="p-4 border rounded bg-gray-100">
       {item.imageUrl && (
         <img
-          src={item.imageUrl}
+          srcs={`http://localhost:5000/${item.imageUrl}`}
           alt={item.name}
           className="h-14 w-14 object-cover rounded mb-2"
         />
