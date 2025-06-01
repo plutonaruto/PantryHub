@@ -17,7 +17,7 @@ export function useInventory() {
   const addItem = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData;
+    const formDataToSend = new FormData();
 
     formDataToSend.append('name', formData.name);
     formDataToSend.append('expiry_date', formData.expiry);
