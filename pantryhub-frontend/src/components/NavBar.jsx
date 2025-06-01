@@ -1,23 +1,34 @@
 import React from 'react';
-import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
-const Navbar = () => {
+const NavBar = () => {
   return (
-    <div className="bg-primary py-3 px-4 text-white">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center">
-          <ShoppingCart size={20} className="mr-2" />
-          <Link to="/" className="text-xl font-semibold">PantryHub</Link>
+    <div className="bg-primary shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-14">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="PantryHub Logo" className="h-5 w-5 object-contain max-w-[20px]" />
+            <Link to="/" className="text-white text-lg font-semibold hover:opacity-90">
+              PantryHub
+            </Link>
+          </div>
+          
+          <nav className="flex items-center gap-6">
+            <Link to="/" className="nav-link">
+              Home
+            </Link>
+            <Link to="/inventory" className="nav-link">
+              Inventory
+            </Link>
+            <Link to="/marketplace" className="nav-link">
+              Marketplace
+            </Link>
+          </nav>
         </div>
-        <nav className="flex items-center space-x-6">
-          <Link to="/" className="hover:text-white hover:underline">Home</Link>
-          <Link to="/inventory" className="hover:text-white hover:underline">Inventory</Link>
-          <Link to="/marketplace" className="hover:text-white hover:underline">Marketplace</Link>
-        </nav>
       </div>
     </div>
   );
 };
 
-export default Navbar;
+export default NavBar;

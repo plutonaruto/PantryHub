@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --primary: #a57fb8;
+  --primary: #9C6B98;
   --primary-dark: #8a68a0;
   --primary-light: #c9b2d5;
   --secondary: #f3f4f6;
@@ -17,12 +17,20 @@ body {
   background-color: #f9fafb;
 }
 
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
 .hero-banner {
   background-color: var(--primary);
   color: white;
   padding: 3rem 2rem;
   border-radius: 0.5rem;
-  background-image: linear-gradient(to right, rgba(165, 127, 184, 0.95), rgba(165, 127, 184, 0.8));
+  background-image: linear-gradient(to right, #a57fb8f2, #a57fb8cc);
 }
 
 .btn-primary {
@@ -97,6 +105,7 @@ body {
   border-radius: 0.5rem;
   border: 1px solid #e2e8f0;
   outline: none;
+  background-color: white;
 }
 
 .search-input:focus {
@@ -125,4 +134,23 @@ body {
 
 .quantity-btn:hover {
   background-color: #e5e7eb;
+}
+
+/* Navigation Styles */
+.nav-link {
+  color: white;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+/* Topbar Styles */
+.topbar {
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 0;
 }

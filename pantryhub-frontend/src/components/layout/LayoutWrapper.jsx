@@ -1,11 +1,11 @@
 import React from 'react';
+import NavBar from '../NavBar';
 import Topbar from './Topbar';
-import Navbar from '../Navbar'; 
 
 const LayoutWrapper = ({ children, showTopbar = false, searchQuery = '', onSearchChange = () => {}, onPostItem = () => {} }) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <NavBar />
       {showTopbar && (
         <Topbar 
           searchQuery={searchQuery}

@@ -4,9 +4,14 @@ export default function MarketplaceItemCard({ item, onClaim }) {
   const [claimQty, setClaimQty] = useState(1);
   const [warning, setWarning] = useState('');
 
-  //restrict claimQty to max quantity available
-  const handleQuantityChange = (e) => { 
+  const handleQuantityChange = (e) => {
     const newQty = parseInt(e.target.value);
+    if (isNaN(newQty) || newQty < 1) {
+      setClaimQty(1);
+      setWarning('');
+      return;
+    }
+
     if (newQty > item.quantity) {
       setWarning(`Only ${item.quantity} items available.`);
     } else {
@@ -17,7 +22,7 @@ export default function MarketplaceItemCard({ item, onClaim }) {
   };
 
   const handleClaim = () => {
-    if (claimQty > item.quantity || claimQty < 1) return;
+    if (claimQty < 1 || claimQty > item.quantity) return;
     onClaim(claimQty);
     setClaimQty(1);
   };
@@ -25,10 +30,11 @@ export default function MarketplaceItemCard({ item, onClaim }) {
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col justify-between">
       {item.imageUrl && (
-        <img 
-          src={`http://localhost:5000/${item.imageUrl}`} 
-          alt={item.name} 
-          className="w-full h-40 object-cover rounded mb-2" 
+        <img
+          src={`http://localhost:5000/${item.imageUrl}`}
+          alt={item.name}
+          className="max-h-24 w-full object-contain rounded mb-2"
+
         />
       )}
       <h3 className="text-lg font-bold text-gray-800">{item.name}</h3>
@@ -58,5 +64,3 @@ export default function MarketplaceItemCard({ item, onClaim }) {
     </div>
   );
 }
-
-  
