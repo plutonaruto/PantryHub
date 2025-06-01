@@ -23,38 +23,38 @@ export default function MarketplaceItemCard({ item, onClaim }) {
   };
 
   return (
-    <div className="p-4 border rounded bg-gray-50 shadow">
+    <div className="bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col justify-between">
       {item.imageUrl && (
-        <img src={`http://localhost:5000/${item.imageUrl}`} alt={item.name} className="w-full h-32 object-cover rounded mb-2" />
+        <img 
+          src={`http://localhost:5000/${item.imageUrl}`} 
+          alt={item.name} 
+          className="w-full h-40 object-cover rounded mb-2" 
+        />
       )}
-      <h3 className="font-bold">{item.name}</h3>
-      <p className="text-sm italic text-gray-600">{item.description}</p>
-      <p className="text-sm">Expires: {item.expiry_date}</p>
-      <p className="text-sm font-medium">Available: {item.quantity}</p>
-
-      <div className="flex items-center mt-2">
+      <h3 className="text-lg font-bold text-gray-800">{item.name}</h3>
+      <p className="text-sm text-gray-600 italic">{item.description}</p>
+      <div className="text-sm text-gray-500 mt-1">
+        <p>Expires: {item.expiry_date}</p>
+        <p>Available: {item.quantity}</p>
+      </div>
+      <div className="mt-3 flex items-center gap-2">
         <input
           type="number"
           min="1"
           max={item.quantity}
           value={claimQty}
           onChange={handleQuantityChange}
-          className="w-16 p-1 border text-center"
-       />
-       <button 
-          onClick={handleClaim} 
-          className="bg-blue-500 text-white px-3 py-1 rounded"
+          className="w-16 px-2 py-1 border rounded text-center text-sm"
+        />
+        <button
+          onClick={handleClaim}
+          className="bg-purple-600 text-white px-4 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
           disabled={claimQty < 1 || claimQty > item.quantity}
         >
           Claim
         </button>
       </div>
-
-      {warning && (
-        <p className="text-red-500 text-sm mt-1">
-          {warning}
-        </p>
-      )}
+      {warning && <p className="text-sm text-red-500 mt-1">{warning}</p>}
     </div>
   );
 }
