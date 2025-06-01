@@ -3,6 +3,8 @@ import axios from 'axios';
 
 export function useMarketplace() {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '', expiry: '' , quantity: 1, image: null});
 
   const fetchItems = async () => {
@@ -11,6 +13,8 @@ export function useMarketplace() {
       setItems(res.data);
     } catch (err) {
       console.error("Error fetching items:", err);
+      setError("Failed to load marketplace items");
+      setLoading(false);
     }
   };
 

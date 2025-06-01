@@ -1,14 +1,23 @@
+import React from 'react';
+import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function Navbar() {
+const Navbar = () => {
   return (
-   <nav className="bg-purple-700 text-white px-8 py-3 flex justify-between items-center shadow">
-      <div className="text-xl font-bold">PantryHub</div>
-      <div className="flex gap-x-16 text-sm">
-        <Link to="/" className="px-3 py-1 hover:text-purple-200 transition">Home</Link>
-        <Link to="/inventory" className="px-3 py-1 hover:text-purple-200 transition">Inventory</Link>
-        <Link to="/marketplace" className="px-3 py-1 hover:text-purple-200 transition">Marketplace</Link>
+    <div className="bg-primary py-3 px-4 text-white">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center">
+          <ShoppingCart size={20} className="mr-2" />
+          <Link to="/" className="text-xl font-semibold">PantryHub</Link>
+        </div>
+        <nav className="flex items-center space-x-6">
+          <Link to="/" className="hover:text-white hover:underline">Home</Link>
+          <Link to="/inventory" className="hover:text-white hover:underline">Inventory</Link>
+          <Link to="/marketplace" className="hover:text-white hover:underline">Marketplace</Link>
+        </nav>
       </div>
-    </nav>
+    </div>
   );
-}
+};
+
+export default Navbar;

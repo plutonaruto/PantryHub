@@ -1,5 +1,23 @@
-<div className="bg-[#9C6B98] text-white text-center py-12">
-  <img src="/cart-image.png" alt="Shopping Cart" className="mx-auto h-40" />
-  <h1 className="text-3xl font-bold mt-4">Welcome to the Marketplace.</h1>
-  <p className="mt-2">Share more. Waste less.</p>
-</div>
+import React from 'react';
+
+const HeroBanner = ({ title, subtitle, image }) => {
+  return (
+    <div className="hero-banner flex items-center justify-between mb-8">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">{title}</h1>
+        <p className="text-white text-opacity-90">{subtitle}</p>
+      </div>
+      {image && (
+        <div className="hidden md:block">
+          <img 
+            src={image} 
+            alt="Banner illustration" 
+            className="h-44 object-contain"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default HeroBanner;
