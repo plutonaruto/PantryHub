@@ -57,7 +57,6 @@ class Item(db.Model):
     expiry_date = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     image_url = db.Column(db.String, nullable=True)
-    #bio = db.Column(db.Text) #need this for selling items?
 
     def __repr__(self): # for debugging
         return f'<MarketplaceItem {self.id}>'
