@@ -92,11 +92,18 @@ def create():
     print("Received FORM:", data)
     file = request.files.get('image')
 
-    if not file or not allowed_file(file.filename):
-        return jsonify({"error": "Invalid or missing image"}), 400
+    #optional image handling
+    image_path = None
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
+        file.save(image_path)
+        image_path = f"/uploads/{filename}" #create url
+    
+    image_url = f"/uploads/{filename}" if file and allowed_file(file.filename) else None
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
-    if not all(field in data for field in required_fields):
+    if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
     
     filename = secure_filename(file.filename)
