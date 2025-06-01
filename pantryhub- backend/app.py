@@ -247,11 +247,26 @@ def patch(market_item_id):
         return jsonify({"error": f"Item not found"}), 404
 
     data = request.get_json()
+    print("PATCH DATA:", data)  # Debug
+
+    if not market_item:
+        return jsonify({"error": "Item not found"}), 404
+
+    if 'quantity' in data:
+        if data['quantity'] is None:
+            return jsonify({"error": "Quantity cannot be null"}), 400
+        try:
+            market_item.quantity = int(data['quantity'])
+        except ValueError:
+            return jsonify({"error": "Quantity must be a number"}), 400
+
+    if 'claimed' in data:
+        market_item.claimed = bool(data['claimed'])
 
     if 'name' in data:
         market_item.name = data['name']
     if 'quantity' in data:
-        market_item.quantity = data['quantity']
+        market_item.quantity = int(data['quantity'])
     if 'room_no' in data:
         market_item.room_no = data['room_no']
     if 'owner_id' in data:
@@ -271,7 +286,7 @@ def patch(market_item_id):
 
     db.session.commit()
     
-    return jsonify({"message": f"Item {market_item.id} updated"})
+    return jsonify({"message": f"Item {market_item.id} updated"}, 200)
 
 #fetch all items
 @app.route('/marketplace', methods=['GET'])
