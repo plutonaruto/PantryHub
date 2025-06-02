@@ -55,11 +55,42 @@ export function useInventory() {
     }
   };
 
+  const adjustQty = (index, delta) => {
+    const newItems = [...items];
+    newItems[index].quantity = Math.max(1, newItems[index].quantity + delta)
+    setItems(newItems);
+  }
+
+  const fetchItem= async() => {
+    try{
+      const res = await axios.get(`http://localhost:5000/items/${item.id}`);
+      setItems(res.data)
+
+    } catch (err) {
+      console.error("Item not found:", err)
+
+    }
+
+  };
+
+  const removeItem = async (index) => {
+  const itemId = items[index].id;  // Get the item ID based on the index
+  
+  try {
+    // Send DELETE request to remove the item from the backend
+    await axios.delete(`http://localhost:5000/items/${itemId}`);
+    const updatedItems = items.filter((_, i) => i !== index);  // Filter out the deleted item
+    setItems(updatedItems);  // Update the state with the new list
+  } catch (err) {
+    console.error("Error deleting item:", err);
+  }
+};
+
   useEffect(() => {
     axios.get("http://localhost:5000/items")
       .then((res) => setItems(res.data))
       .catch((err) => console.error("Failed to fetch items:", err));
   }, []);
 
-  return { items, formData, addItem, updateForm, onImageChange, setItems };
+  return { items, formData, addItem, updateForm, onImageChange, setItems, adjustQty, removeItem, fetchItem};
 }
