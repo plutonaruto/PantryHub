@@ -2,7 +2,7 @@ import ItemForm from '../components/forms/ItemForm';
 import ItemCard from '../components/cards/ItemCard';
 import { useInventory } from '../hooks/useInventory';
 import { useState } from 'react';
-import Sidebar from '../components/shared/Sidebar';
+import Sidebar from '../components/Sidebar';
 import HeroBanner from '../components/layout/HeroBanner';
 import { X } from 'lucide-react';
 import InventoryView from '../components/InventoryView';

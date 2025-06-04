@@ -2,7 +2,7 @@
 import { FaChevronRight } from 'react-icons/fa';
 import { Link } from 'react-router-dom'; 
 import ItemForm from '../components/forms/ItemForm';
-import ItemCard from '../components/cards/ItemCard';
+import ItemCard from './cards/ItemCard';
 import { useState, useEffect } from 'react';
 
 

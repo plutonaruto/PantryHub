@@ -8,10 +8,7 @@ const NavBar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-14">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="PantryHub Logo" className="h-5 w-5 object-contain max-w-[20px]" />
-            <Link to="/" className="text-white text-lg font-semibold hover:opacity-90">
-              PantryHub
-            </Link>
+            <img src={logo} alt="PantryHub Logo" className="h-5 w-5 object-contain max-w-[60px]" />
           </div>
           
           <nav className="flex items-center gap-6">
