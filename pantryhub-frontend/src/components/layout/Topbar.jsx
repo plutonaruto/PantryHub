@@ -5,8 +5,8 @@ const Topbar = ({ searchQuery, onSearchChange, onPostItem }) => {
   return (
     <div className="topbar">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="search-container">
+        <div className="flex flex-row justify-between items-center gap-4">
+          <div className="search-container relative">
             <input
               type="text"
               placeholder="Search for anything..."
@@ -17,13 +17,15 @@ const Topbar = ({ searchQuery, onSearchChange, onPostItem }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           </div>
           
-          <button 
-            className="btn-primary flex items-center gap-2 whitespace-nowrap"
-            onClick={onPostItem}
-          >
-            <Plus size={18} />
-            Post an Item
-          </button>
+          <div className="flex justify-end w-full md:w-auto">
+            <button
+              className="btn-primary flex items-center gap-2 whitespace-nowrap"
+              onClick={onPostItem}
+            >
+              <Plus size={18} />
+              Post an Item
+            </button>
+          </div>
         </div>
       </div>
     </div>
