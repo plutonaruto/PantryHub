@@ -30,7 +30,7 @@ body {
   color: white;
   padding: 3rem 2rem;
   border-radius: 0.5rem;
-  background-image: linear-gradient(to right, #a57fb8f2, #a57fb8cc);
+  /*background-image: linear-gradient(to right, #a57fb8f2, #a57fb8cc);*/
 }
 
 .btn-primary {
