@@ -8,16 +8,16 @@ import { useState, useEffect } from 'react';
 
 
 
-export default function InventoryView({name, items}) {
+export default function InventoryView({name, items = [] }) {
     const [updatedItems, setUpdatedItems] = useState(items);
 
     const onAdjustQty = (index, delta) => {
         const newItem =[...updatedItems];
     
-    const newQuantity = Math.max(1, newItems[index].quantity + delta);
-    newItems[index].quantity = newQuantity;
+      const newQuantity = Math.max(1, newItems[index].quantity + delta);
+      newItems[index].quantity = newQuantity;
 
-    setUpdatedItems(newItems);
+      setUpdatedItems(newItems);
 
     };
 
