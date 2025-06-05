@@ -1,0 +1,25 @@
+{
+  "name": "pantryhub",
+  "version": "1.0.0",
+  "description": "## Problem Motivation Students often experience difficulties in keeping the shared pantries clean and organised due to various reasons, which include the lack of responsibility from other residents in keeping the pantry clean. Additionally, residents may lack the time to cook and discard leftover ingredients, resulting in food wastage.  Therefore, we introduce PantryHub, a one-stop pantry sharing system where users are able to keep track of the food items that they own in the pantry, give away food they no longer need through a shared marketplace, and use easy-to-follow recipes that takes into account the ingredients and kitchenware that the residents have. This encourages everyone to be more considerate in using the pantry.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plutonaruto/PantryHub.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/plutonaruto/PantryHub/issues"
+  },
+  "homepage": "https://github.com/plutonaruto/PantryHub#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.1.8"
+  }
+}

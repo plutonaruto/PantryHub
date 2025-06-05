@@ -1,15 +1,24 @@
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
+import React from 'react';
+
 
 export default function Sidebar() {
     return (
-        <div className="w-64 bg-[#9C6B98] text-white flex flex-col p-6 h-screen">
-            <div className="text-xl font-bold">PantryHub</div>
-            <div className="flex gap-x-16 text-sm">
-                <Link to="/" className="px-3 py-1 hover:text-purple-200 transition">Home</Link>
-                <Link to="/inventory" className="px-3 py-1 hover:text-purple-200 transition">Inventory</Link>
-                <Link to="/marketplace" className="px-3 py-1 hover:text-purple-200 transition">Marketplace</Link>
+        <div className="bg-primary shadow-sm flex flex-col h-screen">
+            <div className="container mx-auto px-4">
+                <div className="flex flex-col justify-between items-center">
+                    <div className="flex flex-col items-center gap-2"></div>
+                        <img src ={logo} alt="PantryHub Logo"  className="h-5 w-5 object-contain max-w-[60px]" />
+                    </div>
 
-            </div>
+            <nav className="flex flex-col items-center gap-6">
+                <Link to="/" className="nav-link">Home</Link>
+                <Link to="/inventory" className="nav-link">Inventory</Link>
+                <Link to="/marketplace" className="nav-link">Marketplace</Link>
+
+            </nav>
+           </div>
         </div>
     );
 

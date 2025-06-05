@@ -87,9 +87,7 @@ export function useInventory() {
 };
 
   useEffect(() => {
-    axios.get("http://localhost:5000/items")
-      .then((res) => setItems(res.data))
-      .catch((err) => console.error("Failed to fetch items:", err));
+    fetchItems();
   }, []);
 
   return { items, formData, addItem, updateForm, onImageChange, setItems, adjustQty, removeItem, fetchItem};

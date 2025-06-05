@@ -4,15 +4,18 @@ import { Link } from 'react-router-dom';
 import ItemForm from '../components/forms/ItemForm';
 import ItemCard from './cards/ItemCard';
 import { useState, useEffect } from 'react';
+import cart from '../assets/cart.png';
 
 
 
 
 export default function InventoryView({name, items = [] }) {
     const [updatedItems, setUpdatedItems] = useState(items);
+    const [expiringItems, setExpiringItems] = useState([]);
+
 
     const onAdjustQty = (index, delta) => {
-        const newItem =[...updatedItems];
+      const newItems =[...updatedItems];
     
       const newQuantity = Math.max(1, newItems[index].quantity + delta);
       newItems[index].quantity = newQuantity;
@@ -21,14 +24,10 @@ export default function InventoryView({name, items = [] }) {
 
     };
 
-    const [expiringItems, setExpiringItems] = useState([]);
-
-
     useEffect(() => {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1); 
-
 
     const expiring = items.filter(item => {
       const expiryDate = new Date(item.expiry_date);
@@ -42,14 +41,18 @@ export default function InventoryView({name, items = [] }) {
     setExpiringItems(expiring);
     }, [items]);
 
+    useEffect(() => {
+        setUpdatedItems(items); 
+    }, [items]);
+
     return (
     <>
-      <section className="px-8 py-6 bg-[#9C6B98] rounded-lg mb-8">
-        <h1 className="text-3xl font-bold mb-1 text-white">
+      <div className="hero-banner flex flex-col justify-between mb-8">
+        <h1 className="text-3xl font-bold mb-2">
           Welcome Back, {name}!
         </h1>
-        <p className="text-lg text-white">What would you like to do today?</p>
-      </section>
+        <p className="text-white text-opacity-90">What would you like to do today?</p>
+      </div>
 
       <div className="flex gap-6">
         {/* Left Column */}
@@ -71,10 +74,10 @@ export default function InventoryView({name, items = [] }) {
         </div>
 
         {/* Right Column */}
-        <div className="w-[300px] flex flex-col gap-6">
+        <div className="w-[300px] flex flex-col gap-6 mb-6 ">
           {/* Expiring Items */}
-          <div className="bg-gray-200 p-4 rounded-lg">
-            <div className="text-lg font-bold text-black">Expiring Soon</div>
+          <div className="bg-[#cccccc] p-4 rounded-full text-center gap-2 items-center justify-center mb-6">
+            <div className="text-lg font-extrabold text-black ">Expiring Soon</div>
             {expiringItems.map((item) => (
               <p key={item.id}>
                 <span className="font-bold">{item.name}</span>{" "}
@@ -84,7 +87,8 @@ export default function InventoryView({name, items = [] }) {
           </div>
 
           {/* Marketplace Link */}
-          <div className="bg-[#9C6B98] p-4 rounded-lg text-center">
+          <div className="flex flex-col bg-[#9C6B98] container rounded-full text-center gap-2 items-center justify-center mt-6">
+            <img src={cart} alt="Cart" className="h-5 w-5 object-contain max-w-[60px]"></img>
             <Link to="/marketplace">
               <button className="text-white bg-white/20 px-4 py-2 rounded-full flex items-center justify-center gap-2">
                 Explore Marketplace <FaChevronRight />
