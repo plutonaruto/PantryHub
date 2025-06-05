@@ -36,9 +36,12 @@ export default function Inventory() {
   
 
   return (
-    <div className="container">
-      <Sidebar className="sidebar" />
-
+  <div className="flex min-h-screen">
+    {/* Sidebar: fix width */}
+    <div className="w-64 bg-purple-700 text-white flex flex-col p-4">
+      <Sidebar />
+    </div>
+    <main className="flex-1 p-6 bg-gray-50">
       {isFormVisible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white w-full max-w-xl mx-auto p-6 rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
@@ -53,32 +56,30 @@ export default function Inventory() {
             </div>
 
             <ItemForm 
-          formData={formData} 
-          onChange={updateForm} 
-          onSubmit={addItem} 
-          onImageChange={onImageChange}
-          />
+              formData={formData} 
+              onChange={updateForm} 
+              onSubmit={addItem} 
+              onImageChange={onImageChange}
+            />
+          </div>
         </div>
-      </div>
       )}
 
-      <div className="grid grid-cols-4 gap-4">
-            {items.map((item, i) => (
-            <ItemCard
-                key={i}
-                item={item}
-                onIncrement={() => adjustQty(i, 1)}
-                onDecrement={() => adjustQty(i, -1)}
-            />
-            ))}
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        {items.map((item, i) => (
+          <ItemCard
+            key={i}
+            item={item}
+            onIncrement={() => adjustQty(i, 1)}
+            onDecrement={() => adjustQty(i, -1)}
+          />
+        ))}
       </div>
 
-      <InventoryView className = "mt-8"/>
-
+      <div className="mt-8">
+        <InventoryView />
       </div>
-
-        
-          );
-  
-      
+    </main>
+  </div>
+);
 }
