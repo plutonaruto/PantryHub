@@ -35,30 +35,30 @@ export default function Inventory() {
   
 
   return (
-  <div className="flex min-h-screen gap-8">
-    {/* Sidebar: fix width */}
-    <div className="w-64 bg-purple-700 text-white flex flex-col p-6 flex-shrink-0">
-      <Sidebar />
+    <div className="flex min-h-screen gap-2">
+      {/* Sidebar: fix width */}
+      <div className="w-64 bg-primary text-white flex flex-col p-2 flex-shrink-0">
+        <Sidebar />
+      </div>
+
+      <main className="flex-1 bg-gray-50">
+
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          {items.map((item, i) => (
+            <ItemCard
+              key={i}
+              item={item}
+              onIncrement={() => adjustQty(i, 1)}
+              onDecrement={() => adjustQty(i, -1)}
+            />
+          ))}
+        </div>
+
+        <div className="mt-4 ml-4 p-2">
+          <InventoryView />
+        </div>
+      </main>
     </div>
 
-    <main className="flex-1 p-6 bg-gray-50">
-
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        {items.map((item, i) => (
-          <ItemCard
-            key={i}
-            item={item}
-            onIncrement={() => adjustQty(i, 1)}
-            onDecrement={() => adjustQty(i, -1)}
-          />
-        ))}
-      </div>
-
-      <div className="mt-8 ml-4 p-4">
-        <InventoryView />
-      </div>
-  </main>
-  </div>
-
-);
+  );
 }
