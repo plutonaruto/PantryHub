@@ -77,7 +77,7 @@ export function useMarketplace() {
 
     try {
       if (remainingQty <= 0) {
-        // Mark as claimed and remove item
+        // mark as claimed and remove item
         await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
           quantity: 0,
           claimed: true

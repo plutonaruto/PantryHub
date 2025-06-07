@@ -214,6 +214,11 @@ def create_marketitem():
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
+    quantity = int(data.get('quantity', 1))
+    if quantity < 1:
+        return jsonify({"error": "Invalid quantity"}), 400
+
+
     try:
         market_item = MarketplaceItem(
             name=data['name'],

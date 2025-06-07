@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import HeroBanner from '../components/layout/HeroBanner';
 import MarketplaceForm from '../components/forms/MarketplaceForm';
@@ -31,13 +31,13 @@ const Marketplace = () => {
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const success = await addItem(e);
+      const success = await addItem(); // no need to pass event
       if (success) {
         setIsFormVisible(false);
+        setSearchQuery('');
       }
     } catch (err) {
       console.error('Failed to add item:', err);
