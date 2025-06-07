@@ -18,7 +18,7 @@ function App() {
     <Profile />
   ) : (
     <div>
-      <h1>Firebase Emulator Demo</h1>
+      <h1>Firebase Emulator</h1>
       <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <input type="text" placeholder="Age" value={age} onChange={(e) => setAge(e.target.value)} />
