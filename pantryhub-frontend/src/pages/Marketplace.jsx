@@ -31,9 +31,11 @@ const Marketplace = () => {
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
     try {
+      console.log("handleSubmit triggered");
       const success = await addItem(); // no need to pass event
       if (success) {
         setIsFormVisible(false);

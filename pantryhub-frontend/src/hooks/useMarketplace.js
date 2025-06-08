@@ -18,8 +18,8 @@ export function useMarketplace() {
     }
   };
 
-  const addItem = async (e) => {
-    e.preventDefault();
+  const addItem = async () => {
+    console.log("addItem called", formData);
 
     const form = new FormData();
     form.append("name", formData.name);
