@@ -1,7 +1,7 @@
-// src/App.js
 import React, { useState } from "react";
 import { useAuth } from "./AuthProvider";
 import Profile from "./Profile";
+import { storeFirebaseToken } from "./utils/auth";
 
 function App() {
   const { user, signup, login } = useAuth();
@@ -11,8 +11,15 @@ function App() {
   const [gender, setGender] = useState("");
   const [address, setAddress] = useState("");
 
-  const handleSignup = () => signup(email, password, { age, gender, address });
-  const handleLogin = () => login(email, password);
+  const handleSignup = async() => {
+    await signup(email, password, { age, gender, address });
+    await storeFirebaseToken();
+  };
+
+  const handleLogin = async() => {
+    await login(email, password);
+    await storeFirebaseToken();
+  };
 
   return user ? (
     <Profile />
