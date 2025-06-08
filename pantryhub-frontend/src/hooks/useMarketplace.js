@@ -31,7 +31,7 @@ export function useMarketplace() {
     form.append("pantry_id", 1);
     
     if (formData.image) {
-    form.append("image", formData.image);
+      form.append("image", formData.image);
     }
 
     try {
@@ -42,8 +42,11 @@ export function useMarketplace() {
       });
       await fetchItems();
       setFormData({ name: '', description: '', expiry_date: '', quantity: 1, image: null });
+      return true; //success flag
+
     } catch (err) {
       console.error("Failed to post marketplace item:", err.response?.data || err.message);
+      return false; //failure
     }
 };
 

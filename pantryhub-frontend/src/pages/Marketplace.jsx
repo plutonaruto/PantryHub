@@ -75,6 +75,7 @@ const Marketplace = () => {
             onChange={updateForm}
             onSubmit={handleSubmit}
             onImageChange={onImageChange}
+            onSuccess={() => setIsFormVisible(false)}
           />
         </div>
       </div>

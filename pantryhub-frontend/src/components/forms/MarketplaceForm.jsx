@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import TextInput from '../shared/TextInput';
 import QuantityControl from '../shared/QuantityControl';
 
-export default function MarketplaceForm({ formData, onChange, onSubmit, onImageChange }) {
+export default function MarketplaceForm({ formData, onChange, onSubmit, onImageChange, onSuccess }) {
   const [warning, setWarning] = useState('');
   const [localQuantity, setLocalQuantity] = useState(parseInt(formData.quantity, 10) || 1);
   const SUPPORTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
@@ -32,15 +32,25 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
     }
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     if (localQuantity < 1) {
       setWarning('Quantity must be at least 1');
       return;
     }
+
+    if (imageWarning) {
+    setImageWarning('File type unsupported');
+    return;
+    }
     
-    onSubmit(e);
+    const success = await onSubmit(e); // should return true if API call worked
+
+    if (success && typeof onSuccess === 'function') {
+      console.log("hide now pls");
+      onSuccess(); // Hide form
+    }
   };
 
   return (
