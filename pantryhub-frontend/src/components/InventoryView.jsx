@@ -6,11 +6,15 @@ import cart from '../assets/cart.png';
 import Topbar from '../components/layout/Topbar';
 
 
-
-
 export default function InventoryView({name, items = [] }) {
     const [updatedItems, setUpdatedItems] = useState(items);
     const [expiringItems, setExpiringItems] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isFormVisible, setIsFormVisible] = useState(false);
+
+  const handleSearchChange = (e) => { setSearchQuery(e.target.value); };
+  const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
 
   const onAdjustQty = (index, delta) => {
@@ -36,11 +40,11 @@ export default function InventoryView({name, items = [] }) {
 
 
     setExpiringItems(expiring);
-    }, [items]);
+    }, []);
 
     useEffect(() => {
         setUpdatedItems(items); 
-    }, [items]);
+    }, []);
 
   return (
     <div className="flex flex-col gap-4"> {/* Unified vertical spacing */}
@@ -52,9 +56,8 @@ export default function InventoryView({name, items = [] }) {
 
       <div className = "flex flex-col mb-6 mt-6">
         <Topbar
-          searchQuery={searchQuery}
-          onSearchChange={onSearchChange}
-          onPostItem={onPostItem}/>
+        searchQuery={searchQuery}
+         onSearchChange={handleSearchChange}/>
       </div>
 
       {/* Content Section */}
@@ -75,7 +78,6 @@ export default function InventoryView({name, items = [] }) {
               </Link>
             ))}
           </div>
-        </main>
         </div>
 
         {/* Right Column */}

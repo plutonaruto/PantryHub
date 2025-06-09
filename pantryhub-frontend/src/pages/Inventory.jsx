@@ -55,9 +55,9 @@ export default function Inventory() {
       </div>
 
       <div className="mt-8 ml-4 p-4">
-        <InventoryView 
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}/>
+        <InventoryView/>
       </div>
   </main>
   </div>
+  );
+}
