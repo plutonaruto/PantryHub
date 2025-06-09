@@ -16,7 +16,6 @@ from firebase_admin import credentials, auth
 from auth_helper import login_required
 
 
-
 load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -29,7 +28,8 @@ CORS(app)
 #cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
 
 os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-firebase_admin.initialize_app()               
+if not firebase_admin._apps:
+    firebase_admin.initialize_app()             
 
 @app.route('/verify', methods = ['POST'])
 def verify_token():
@@ -83,7 +83,7 @@ def allowed_file(filename):
 
 #expose uploads/ as static route
 @app.route('/uploads/<filename>')
-@login_required
+# @login_required
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOADED_FOLDER'], filename)
 
@@ -240,9 +240,11 @@ def get_all_items():
 # ----------------------
 # Marketplace Endpoints
 # ----------------------
+# TEMP: Commented out for development. Re-enable when frontend auth is complete.
+
 #create new post
 @app.route('/marketplace', methods=['POST'])
-@login_required
+# @login_required
 def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
@@ -254,8 +256,6 @@ def create_marketitem():
         image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
         file.save(image_path)
         image_path = f"/uploads/{filename}" #create url
-
-    image_url = f"/uploads/{filename}" if file and allowed_file(file.filename) else None
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
     if not all(data.get(field) for field in required_fields):
@@ -288,7 +288,7 @@ def create_marketitem():
 
 #patch an item
 @app.route('/marketplace/<int:market_item_id>', methods=['PATCH'])
-@login_required
+# @login_required
 def patch(market_item_id):
     market_item = MarketplaceItem.query.get(market_item_id)
     if not market_item:
@@ -338,7 +338,7 @@ def patch(market_item_id):
 
 #fetch all items
 @app.route('/marketplace', methods=['GET'])
-@login_required
+# @login_required
 def get_marketplace_items():
     items = MarketplaceItem.query.filter_by(claimed=False).all() #fetch unclaimed only
     result = []
