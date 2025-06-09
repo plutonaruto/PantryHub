@@ -114,6 +114,7 @@ class MarketplaceItem(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     description = db.Column(db.Text, nullable=True)
     claimed = db.Column(db.Boolean, default=False)
+    pickup_location = db.Column(db.String(100), nullable=True)
 
     def __repr__(self): # for debugging
         return f'<MarketplaceItem {self.id}>'
@@ -334,6 +335,28 @@ def patch(market_item_id):
     db.session.commit()
     
     return jsonify({"message": f"Item {market_item.id} updated"}, 200)
+
+# get an item
+@app.route('/marketplace/<int:item_id>', methods=['GET'])
+def get_marketplace_item(item_id):
+    item = MarketplaceItem.query.get(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    return jsonify({
+        "id": item.id,
+        "name": item.name,
+        "quantity": item.quantity,
+        "room_no": item.room_no,
+        "owner_id": item.owner_id,
+        "pantry_id": item.pantry_id,
+        "pickup_location": item.pickup_location,
+        "expiry_date": item.expiry_date.strftime('%Y-%m-%d'),
+        "description": item.description,
+        "image_url": item.image_url,
+        "claimed": item.claimed
+    }), 200
+
 
 #fetch all items
 @app.route('/marketplace', methods=['GET'])
