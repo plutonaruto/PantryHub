@@ -2,4 +2,7 @@
 pantry-frontend/node_modules/
 pantry-frontend/.vite/
 pantry-frontend/dist/
+
+# backend
 pantryhub- backend/.env
+pantryhub- backend/firebase-admin-key.json

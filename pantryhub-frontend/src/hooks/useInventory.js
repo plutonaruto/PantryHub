@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { fetchWithAuth } from "../fetchWithAuth";
+import { fetchWithAuth } from "../firebase/fetchWithAuth";
 
 export function useInventory() {
   const [items, setItems] = useState([]);
