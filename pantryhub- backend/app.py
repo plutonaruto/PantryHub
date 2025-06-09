@@ -13,8 +13,7 @@ from sqlalchemy.sql import func
 from flask_migrate import Migrate
 from flask import send_from_directory
 from firebase_admin import credentials, auth
-from auth_helper import login_required
-
+from auth.auth_helper import login_required
 
 load_dotenv()
 
