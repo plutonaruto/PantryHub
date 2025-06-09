@@ -13,7 +13,10 @@ from sqlalchemy.sql import func
 from flask_migrate import Migrate
 from flask import send_from_directory
 from firebase_admin import credentials, auth
-from auth.auth_helper import login_required
+from auth_helper import login_required
+from auth.roleMiddleware import check_role
+
+
 
 load_dotenv()
 
@@ -27,8 +30,7 @@ CORS(app)
 #cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
 
 os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-if not firebase_admin._apps:
-    firebase_admin.initialize_app()             
+firebase_admin.initialize_app()               
 
 @app.route('/verify', methods = ['POST'])
 def verify_token():
@@ -82,7 +84,7 @@ def allowed_file(filename):
 
 #expose uploads/ as static route
 @app.route('/uploads/<filename>')
-# @login_required
+@login_required
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOADED_FOLDER'], filename)
 
@@ -114,7 +116,6 @@ class MarketplaceItem(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     description = db.Column(db.Text, nullable=True)
     claimed = db.Column(db.Boolean, default=False)
-    pickup_location = db.Column(db.String(100), nullable=True)
 
     def __repr__(self): # for debugging
         return f'<MarketplaceItem {self.id}>'
@@ -129,6 +130,7 @@ with app.app_context():
 
 @app.route('/items', methods=['POST'])
 @login_required
+@check_role("create")
 def create():
     data = request.form.to_dict()
     print("Received FORM:", data)
@@ -169,6 +171,7 @@ def create():
 
 @app.route('/items/<string:item_name>', methods=['GET'])
 @login_required
+@check_role("get")
 def get(item_name):
     item = Item.query.get(item_name)
     if not item:
@@ -188,6 +191,7 @@ def get(item_name):
 #delete an item
 @app.route('/items/<int:item_id>', methods=['DELETE'])
 @login_required
+@check_role("delete")
 def delete(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -201,6 +205,7 @@ def delete(item_id):
 #update qty of item
 @app.route('/items/<int:item_id>', methods=['PUT'])
 @login_required
+@check_role("edit")
 def update_quantity(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -218,9 +223,31 @@ def update_quantity(item_id):
     return jsonify({"message": "Quantity updated", "quantity": item.quantity}), 200
 
 
-#fetch all items
-@app.route('/items', methods=['GET'])
+#fetch all items for user 
+@app.route('/items/<int:owner_id>', methods=['GET'])
 @login_required
+@check_role("view_own_items")
+def get_all_items():
+    user = g.current_user
+    items = Item.query.filter_by(owner_id=user['uid'].all())
+    result = []
+    for item in items:
+        result.append({
+            "id": item.id,
+            "name": item.name,
+            "quantity": item.quantity,
+            "image_url": item.image_url,
+            "room_no": item.room_no,
+            "owner_id": item.owner_id,
+            "pantry_id": item.pantry_id,
+            "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
+        })
+    return jsonify(result), 200
+
+#fetch all items for admin
+@app.route('/items/admin', methods=['GET'])
+@login_required
+@check_role("view_all_items")
 def get_all_items():
     items = Item.query.all()
     result = []
@@ -237,14 +264,13 @@ def get_all_items():
         })
     return jsonify(result), 200
 
+
 # ----------------------
 # Marketplace Endpoints
 # ----------------------
-# TEMP: Commented out for development. Re-enable when frontend auth is complete.
-
 #create new post
 @app.route('/marketplace', methods=['POST'])
-# @login_required
+@login_required
 def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
@@ -256,6 +282,8 @@ def create_marketitem():
         image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
         file.save(image_path)
         image_path = f"/uploads/{filename}" #create url
+
+    image_url = f"/uploads/{filename}" if file and allowed_file(file.filename) else None
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
     if not all(data.get(field) for field in required_fields):
@@ -288,7 +316,7 @@ def create_marketitem():
 
 #patch an item
 @app.route('/marketplace/<int:market_item_id>', methods=['PATCH'])
-# @login_required
+@login_required
 def patch(market_item_id):
     market_item = MarketplaceItem.query.get(market_item_id)
     if not market_item:
@@ -336,31 +364,9 @@ def patch(market_item_id):
     
     return jsonify({"message": f"Item {market_item.id} updated"}, 200)
 
-# get an item
-@app.route('/marketplace/<int:item_id>', methods=['GET'])
-def get_marketplace_item(item_id):
-    item = MarketplaceItem.query.get(item_id)
-    if not item:
-        return jsonify({"error": "Item not found"}), 404
-
-    return jsonify({
-        "id": item.id,
-        "name": item.name,
-        "quantity": item.quantity,
-        "room_no": item.room_no,
-        "owner_id": item.owner_id,
-        "pantry_id": item.pantry_id,
-        "pickup_location": item.pickup_location,
-        "expiry_date": item.expiry_date.strftime('%Y-%m-%d'),
-        "description": item.description,
-        "image_url": item.image_url,
-        "claimed": item.claimed
-    }), 200
-
-
 #fetch all items
 @app.route('/marketplace', methods=['GET'])
-# @login_required
+@login_required
 def get_marketplace_items():
     items = MarketplaceItem.query.filter_by(claimed=False).all() #fetch unclaimed only
     result = []
@@ -382,3 +388,5 @@ def get_marketplace_items():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
