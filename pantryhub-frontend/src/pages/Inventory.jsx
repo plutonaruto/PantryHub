@@ -41,26 +41,6 @@ export default function Inventory() {
         <Sidebar />
       </div>
 
-      <main className="flex-1 bg-gray-50">
-
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          {items.map((item, i) => (
-            <ItemCard
-              key={i}
-              item={item}
-              onIncrement={() => adjustQty(i, 1)}
-              onDecrement={() => adjustQty(i, -1)}
-            />
-          ))}
-        </div>
-
-        <div className="mt-4 ml-4 p-2">
-          <InventoryView />
-        </div>
-      </main>
-    </div>
-
-<<<<<<< HEAD
     <main className="flex-1 p-6 bg-gray-50">
 
       <div className="grid grid-cols-4 gap-4 mb-8">
@@ -81,9 +61,3 @@ export default function Inventory() {
       </div>
   </main>
   </div>
-
-);
-=======
-  );
->>>>>>> origin/main
-}
