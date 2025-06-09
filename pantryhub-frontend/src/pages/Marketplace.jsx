@@ -86,7 +86,7 @@ const Marketplace = () => {
         {/* Hero Banner */}
         <HeroBanner 
           title="Welcome to the Marketplace."
-          subtitle="Share items, reduce waste."
+          subtitle="Share more, waste less."
           image={cartImage}
         />
 
@@ -115,7 +115,7 @@ const Marketplace = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {filteredItems.map((item, index) => (
                 <MarketplaceItemCard 
                   key={item.id} 

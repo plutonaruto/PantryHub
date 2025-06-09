@@ -100,6 +100,23 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
         )}
       </div>
 
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Pickup Location
+      </label>
+      <select
+        name="pickup_location"
+        value={formData.pickup_location}
+        onChange={onChange}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+        required
+      >
+        <option value="">Select a level</option>
+        <option value="Level 1">Level 1</option>
+        <option value="Level 2">Level 2</option>
+        <option value="Level 3">Level 3</option>
+        <option value="Level 4">Level 4</option>
+      </select>
+
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Item Image

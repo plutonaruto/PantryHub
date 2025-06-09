@@ -1,4 +1,4 @@
-import { auth } from "../firebase";
+import { auth } from "./firebase";
 
 export async function storeFirebaseToken() {
     if (!auth.currentUser) 

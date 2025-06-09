@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useAuth } from "./AuthProvider";
-import Profile from "./Profile";
-import { storeFirebaseToken } from "./utils/auth";
+import { useAuth } from "./firebase/AuthProvider";
+import Profile from "./pages/Profile";
+import { storeFirebaseToken } from "./firebase/auth";
 
 function App() {
   const { user, signup, login } = useAuth();
