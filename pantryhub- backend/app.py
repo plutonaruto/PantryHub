@@ -1,4 +1,5 @@
 import os
+import firebase_admin
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -8,12 +9,12 @@ from sqlalchemy import Column, Integer, String, DateTime
 from models import Item # Ensure the Item model is imported
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-
 from sqlalchemy.sql import func
-
 from flask_migrate import Migrate
-
 from flask import send_from_directory
+from firebase_admin import credentials, auth
+from auth_helpers import login_required
+
 
 
 load_dotenv()
@@ -22,6 +23,45 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 CORS(app)
+
+#login/register
+#SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+#cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+
+os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
+firebase_admin.initialize_app()               
+
+@app.route('/verify', methods = ['POST'])
+def verify_token():
+    id_token = request.json.get("id_token")
+
+    if not id_token:
+        return jsonify({"error": "ID Token is missing"}), 400
+    
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        user_id = decoded_token['uid']
+        return jsonify({"message": "Token is valid", "user_id": user_id}), 200
+    
+    except auth.InvalidIdTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    try:
+        user = auth.create_user(
+            email=email,
+            password=password,
+        )
+        return jsonify({"message": f"User {user.uid} created successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    
+
+
 
 UPLOADED_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -43,6 +83,7 @@ def allowed_file(filename):
 
 #expose uploads/ as static route
 @app.route('/uploads/<filename>')
+@login_required
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOADED_FOLDER'], filename)
 
@@ -85,8 +126,9 @@ with app.app_context():
 # Inventory Endpoints
 # ----------------------
 #create new post
+
 @app.route('/items', methods=['POST'])
-@app.route('/items', methods=['POST'])
+@login_required
 def create():
     data = request.form.to_dict()
     print("Received FORM:", data)
@@ -126,6 +168,7 @@ def create():
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
 @app.route('/items/<string:item_name>', methods=['GET'])
+@login_required
 def get(item_name):
     item = Item.query.get(item_name)
     if not item:
@@ -144,6 +187,7 @@ def get(item_name):
 
 #delete an item
 @app.route('/items/<int:item_id>', methods=['DELETE'])
+@login_required
 def delete(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -156,6 +200,7 @@ def delete(item_id):
 
 #update qty of item
 @app.route('/items/<int:item_id>', methods=['PUT'])
+@login_required
 def update_quantity(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -175,6 +220,7 @@ def update_quantity(item_id):
 
 #fetch all items
 @app.route('/items', methods=['GET'])
+@login_required
 def get_all_items():
     items = Item.query.all()
     result = []
@@ -196,6 +242,7 @@ def get_all_items():
 # ----------------------
 #create new post
 @app.route('/marketplace', methods=['POST'])
+@login_required
 def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
@@ -241,6 +288,7 @@ def create_marketitem():
 
 #patch an item
 @app.route('/marketplace/<int:market_item_id>', methods=['PATCH'])
+@login_required
 def patch(market_item_id):
     market_item = MarketplaceItem.query.get(market_item_id)
     if not market_item:
@@ -290,6 +338,7 @@ def patch(market_item_id):
 
 #fetch all items
 @app.route('/marketplace', methods=['GET'])
+@login_required
 def get_marketplace_items():
     items = MarketplaceItem.query.filter_by(claimed=False).all() #fetch unclaimed only
     result = []

@@ -18,8 +18,8 @@ export function useMarketplace() {
     }
   };
 
-  const addItem = async (e) => {
-    e.preventDefault();
+  const addItem = async () => {
+    console.log("addItem called", formData);
 
     const form = new FormData();
     form.append("name", formData.name);
@@ -31,7 +31,7 @@ export function useMarketplace() {
     form.append("pantry_id", 1);
     
     if (formData.image) {
-    form.append("image", formData.image);
+      form.append("image", formData.image);
     }
 
     try {
@@ -42,8 +42,11 @@ export function useMarketplace() {
       });
       await fetchItems();
       setFormData({ name: '', description: '', expiry_date: '', quantity: 1, image: null });
+      return true; //success flag
+
     } catch (err) {
       console.error("Failed to post marketplace item:", err.response?.data || err.message);
+      return false; //failure
     }
 };
 
@@ -77,7 +80,7 @@ export function useMarketplace() {
 
     try {
       if (remainingQty <= 0) {
-        // Mark as claimed and remove item
+        // mark as claimed and remove item
         await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
           quantity: 0,
           claimed: true

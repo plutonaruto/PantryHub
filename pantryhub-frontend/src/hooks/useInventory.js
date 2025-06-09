@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { fetchWithAuth } from "./src/fetchWithAuth";
 
 export function useInventory() {
   const [items, setItems] = useState([]);
@@ -7,8 +8,8 @@ export function useInventory() {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/items");
-      setItems(res.data);
+      const data = await fetchWithAuth("http://localhost:5000/items");
+      setItems(data);
     } catch (err) {
       console.error("Error fetching items:", err);
     }
@@ -29,14 +30,15 @@ export function useInventory() {
     
   
     try {
-      await axios.post("http://localhost:5000/items", formDataToSend, {
-        headers: {
-            "Content-Type": "multipart/form-data",  // Required for file uploads
-        }
+      await fetchWithAuth("http://localhost:5000/items", {
+        method: "POST",
+        headers: {},
+        body: formDataToSend        
 
       });
-      const res = await axios.get("http://localhost:5000/items");
-      setItems(res.data);
+
+      const data = await fetchWithAuth("http://localhost:5000/items");
+      setItems(data);
       setFormData({ name: '', expiry: '', quantity: 1, image: null });
     } catch (err) {
       console.error("Failed to post item to backend:", err);
@@ -63,8 +65,8 @@ export function useInventory() {
 
   const fetchItem= async() => {
     try{
-      const res = await axios.get(`http://localhost:5000/items/${item.id}`);
-      setItems(res.data)
+      const data = await fetchWithAuth(`http://localhost:5000/items/${item.id}`);
+      setItems(data)
 
     } catch (err) {
       console.error("Item not found:", err)
@@ -78,7 +80,9 @@ export function useInventory() {
   
   try {
     // Send DELETE request to remove the item from the backend
-    await axios.delete(`http://localhost:5000/items/${itemId}`);
+    await fetchWithAuth(`http://localhost:5000/items/${itemId}` , {
+      method: "DELETE"
+    });
     const updatedItems = items.filter((_, i) => i !== index);  // Filter out the deleted item
     setItems(updatedItems);  // Update the state with the new list
   } catch (err) {

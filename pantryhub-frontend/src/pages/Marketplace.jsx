@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import HeroBanner from '../components/layout/HeroBanner';
 import MarketplaceForm from '../components/forms/MarketplaceForm';
@@ -35,9 +35,11 @@ const Marketplace = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const success = await addItem(e);
+      console.log("handleSubmit triggered");
+      const success = await addItem(); // no need to pass event
       if (success) {
         setIsFormVisible(false);
+        setSearchQuery('');
       }
     } catch (err) {
       console.error('Failed to add item:', err);
@@ -73,6 +75,7 @@ const Marketplace = () => {
             onChange={updateForm}
             onSubmit={handleSubmit}
             onImageChange={onImageChange}
+            onSuccess={() => setIsFormVisible(false)}
           />
         </div>
       </div>

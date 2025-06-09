@@ -9,8 +9,8 @@ export default function Sidebar() {
             <div className="container mx-auto px-4">
                 <div className="flex flex-col justify-between items-center">
                     <div className="flex flex-col items-center gap-2"></div>
-                        <img src ={logo} alt="PantryHub Logo"  className="h-5 w-5 object-contain max-w-[60px]" />
-                    </div>
+                    <img src ={logo} alt="PantryHub Logo"  className="h-12 w-12 object-contain max-w-[80px]" />
+                </div>
 
             <nav className="flex flex-col items-center gap-6">
                 <Link to="/" className="nav-link">Home</Link>
