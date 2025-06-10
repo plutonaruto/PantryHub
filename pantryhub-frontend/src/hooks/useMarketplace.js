@@ -5,7 +5,7 @@ export function useMarketplace() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({ name: '', description: '', expiry_date: '' , quantity: 1, image: null});
+  const [formData, setFormData] = useState({ name: '', description: '', expiry_date: '' , quantity: 1, image: null, pickup_location: ''});
 
   const fetchItems = async () => {
     try {
@@ -29,10 +29,18 @@ export function useMarketplace() {
     form.append("room_no", "101"); //dummy still
     form.append("owner_id", 1);
     form.append("pantry_id", 1);
+    form.append("pickup_location", formData.pickup_location);
     
     if (formData.image) {
       form.append("image", formData.image);
     }
+
+    // debugging
+    console.log("--- FormData being sent ---");
+    for (let pair of form.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+    console.log("---------------------------");
 
     try {
       await axios.post("http://localhost:5000/marketplace", form, {
@@ -41,7 +49,7 @@ export function useMarketplace() {
         }
       });
       await fetchItems();
-      setFormData({ name: '', description: '', expiry_date: '', quantity: 1, image: null });
+      setFormData({ name: '', description: '', expiry_date: '', quantity: 1, image: null, pickup_location: '' });
       return true; //success flag
 
     } catch (err) {

@@ -30,6 +30,7 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
     if (e.target.name !== 'quantity') {
       onChange(e); // pass non-quantity changes up
     }
+    console.log(`Updated formData: ${name} = ${value}`); //debug 
   };
 
   const handleFormSubmit = async (e) => {

@@ -266,7 +266,8 @@ def create_marketitem():
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
             created_at=datetime.utcnow(),
             description=data.get('description', ''), #use .get in case its missing
-            claimed=False
+            claimed=False,
+            pickup_location=data['pickup_location']
             
         )
         db.session.add(market_item)
@@ -321,6 +322,8 @@ def patch(market_item_id):
         market_item.expiry_date = datetime.strptime(data['expiry_date'], '%Y-%m-%d').date()
     if 'description' in data:
         market_item.description = data['description']
+    if 'pickup_location' in data:
+        market_item.pickup_location = data['pickup_location']
     if 'claimed' in data:
         market_item.claimed = data['claimed']
     if market_item.quantity == 0:
@@ -366,6 +369,7 @@ def get_marketplace_items():
             "room_no": item.room_no,
             "owner_id": item.owner_id,
             "pantry_id": item.pantry_id,
+            "pickup_location": item.pickup_location,
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
             "description": item.description,
             "imageUrl": item.image_url,
