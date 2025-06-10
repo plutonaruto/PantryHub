@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { fetchWithAuth } from "../firebase/fetchWithAuth";
 
 export function useInventory() {
   const [items, setItems] = useState([]);
@@ -30,14 +29,14 @@ export function useInventory() {
     
   
     try {
-      await fetchWithAuth("http://localhost:5000/items", {
+      await axios.post("http://localhost:5000/items", {
         method: "POST",
         headers: {},
         body: formDataToSend        
 
       });
 
-      const data = await fetchWithAuth("http://localhost:5000/items");
+      const data = await axios.get("http://localhost:5000/items");
       setItems(data);
       setFormData({ name: '', expiry: '', quantity: 1, image: null });
     } catch (err) {
@@ -65,7 +64,7 @@ export function useInventory() {
 
   const fetchItem= async() => {
     try{
-      const data = await fetchWithAuth(`http://localhost:5000/items/${item.id}`);
+      const data = await axios.get(`http://localhost:5000/items/${item.id}`);
       setItems(data)
 
     } catch (err) {
@@ -80,9 +79,7 @@ export function useInventory() {
   
   try {
     // Send DELETE request to remove the item from the backend
-    await fetchWithAuth(`http://localhost:5000/items/${itemId}` , {
-      method: "DELETE"
-    });
+    await axios.delete(`http://localhost:5000/items/${itemId}`);
     const updatedItems = items.filter((_, i) => i !== index);  // Filter out the deleted item
     setItems(updatedItems);  // Update the state with the new list
   } catch (err) {

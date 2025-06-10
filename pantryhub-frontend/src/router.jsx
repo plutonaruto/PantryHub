@@ -3,7 +3,6 @@ import Home from "./pages/Home";
 import Inventory from "./pages/Inventory";
 import Marketplace from "./pages/Marketplace";
 import MarketplaceItemPage from "./pages/MarketplaceItemPage";
-import FirebaseAuthPage from "./FirebaseAuthPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Home /> },
