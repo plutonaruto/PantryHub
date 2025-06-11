@@ -2,8 +2,9 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
+import QuantityClaim from '../components/shared/QuantityClaim';
 
-export default function MarketplaceItemPage() {
+export default function MarketplaceItemPage({ onClaim }) {
   const { id } = useParams();
   const [item, setItem] = useState(null);
 
@@ -24,7 +25,10 @@ export default function MarketplaceItemPage() {
       <p className="mt-2">Pickup Location: <strong>{item.pickup_location || "N/A"}</strong></p>
       <p>Expiry Date: {item.expiry_date}</p>
       <p>Quantity Available: {item.quantity}</p>
-      <button className="mt-4 bg-primary text-white px-4 py-2 rounded">Claim Now</button>
+      <QuantityClaim
+        maxQty={item.quantity}
+        onClaim={onClaim}
+      />
     </div>
   </LayoutWrapper>
 );

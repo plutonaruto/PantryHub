@@ -1,32 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import QuantityClaim from '../shared/QuantityClaim';
 
 export default function MarketplaceItemCard({ item, onClaim }) {
-  const [claimQty, setClaimQty] = useState(1);
   const [warning, setWarning] = useState('');
-
-  const handleQuantityChange = (e) => {
-    const newQty = parseInt(e.target.value);
-    if (isNaN(newQty) || newQty < 1) {
-      setClaimQty(1);
-      setWarning('');
-      return;
-    }
-
-    if (newQty > item.quantity) {
-      setWarning(`Only ${item.quantity} items available.`);
-    } else {
-      setWarning('');
-    }
-
-    setClaimQty(newQty);
-  };
-
-  const handleClaim = () => {
-    if (claimQty < 1 || claimQty > item.quantity) return;
-    onClaim(claimQty);
-    setClaimQty(1);
-  };
 
   const navigate = useNavigate();
 
@@ -53,21 +30,10 @@ export default function MarketplaceItemCard({ item, onClaim }) {
         </button>
       </div>
       <div className="flex items-center gap-2">
-        <input 
-          type="number"
-          min="1"
-          max={item.quantity}
-          value={claimQty}
-          onChange={handleQuantityChange}
-          className="w-16 px-2 py-1 border rounded text-center text-sm"
+        <QuantityClaim
+          maxQty={item.quantity}
+          onClaim={onClaim}
         />
-        <button
-          onClick={handleClaim}
-          className="bg-purple-600 text-white px-4 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
-          disabled={claimQty < 1 || claimQty > item.quantity}
-        >
-          Claim
-        </button>
         {/* debugging 
         <h3 className="text-lg font-bold text-gray-800">
           (ID: {item.id})
