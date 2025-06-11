@@ -54,6 +54,7 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
     }
   };
 
+
   return (
     <form onSubmit={handleFormSubmit} className="space-y-6">
       <TextInput

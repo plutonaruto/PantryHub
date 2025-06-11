@@ -236,6 +236,11 @@ def get_all_items():
 # ----------------------
 # TEMP: Commented out for development. Re-enable when frontend auth is complete.
 
+# for items with no image input
+@app.route('/placeholder.jpg')
+def placeholder_image():
+    return send_from_directory('static', 'placeholder.jpg')
+
 #create new post
 @app.route('/marketplace', methods=['POST'])
 # @login_required
@@ -350,7 +355,7 @@ def get_marketplace_item(item_id):
         "pickup_location": item.pickup_location,
         "expiry_date": item.expiry_date.strftime('%Y-%m-%d'),
         "description": item.description,
-        "image_url": item.image_url,
+        "image_url": item.image_url or "/placeholder.jpg",
         "claimed": item.claimed
     }), 200
 
@@ -372,7 +377,7 @@ def get_marketplace_items():
             "pickup_location": item.pickup_location,
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
             "description": item.description,
-            "imageUrl": item.image_url,
+            "imageUrl": item.image_url or "/placeholder.jpg",
             "claimed": item.claimed
         })
     return jsonify(result), 200
