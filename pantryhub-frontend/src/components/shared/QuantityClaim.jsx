@@ -6,25 +6,25 @@ export default function QuantityClaim({ maxQty, onClaim }) {
     
     useEffect(() => {
         if (claimQty > maxQty) {
-        setWarning(`Only ${maxQty} items available.`);
+            setWarning(maxQty === 0 ? 'Fully claimed.' : `Only ${maxQty} items available.`);
         } else {
-        setWarning('');
+            setWarning('');
         }
     }, [claimQty, maxQty]);
 
     const handleChange = (e) => {
         const val = parseInt(e.target.value);
         if (isNaN(val) || val < 1) {
-        setClaimQty(1);
-        return;
+            setClaimQty(1);
+            return;
         }
         setClaimQty(val);
     };
 
     const handleClaim = () => {
         if (claimQty >= 1 && claimQty <= maxQty) {
-        onClaim(claimQty);
-        setClaimQty(1);
+            onClaim(claimQty);
+            setClaimQty(1);
         }
     };
 

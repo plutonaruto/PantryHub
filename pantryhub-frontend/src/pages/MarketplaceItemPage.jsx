@@ -4,7 +4,7 @@ import axios from "axios";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import QuantityClaim from '../components/shared/QuantityClaim';
 
-export default function MarketplaceItemPage({ onClaim }) {
+export default function MarketplaceItemPage() {
   const { id } = useParams();
   const [item, setItem] = useState(null);
 
@@ -14,7 +14,27 @@ export default function MarketplaceItemPage({ onClaim }) {
       .catch(err => console.error(err));
   }, [id]);
 
-  if (!item) return <div>Loading...</div>;
+  const claimItem = async (qty) => {
+    if (!item || qty > item.quantity) return;
+
+    try {
+      const response = await axios.patch(`http://localhost:5000/marketplace/${id}`, {
+        quantity: item.quantity - qty,
+        claimed: item.quantity - qty === 0,
+      });
+
+      // update state locally
+      setItem(prev => ({
+        ...prev,
+        quantity: prev.quantity - qty,
+        claimed: prev.quantity - qty === 0,
+      }));
+    } catch (err) {
+      console.error('Error claiming item:', err);
+    }
+  };
+
+  if (!item) return <p>Loading...</p>;
 
   return (
     <LayoutWrapper>
@@ -22,12 +42,12 @@ export default function MarketplaceItemPage({ onClaim }) {
       <img src={`http://localhost:5000${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
       <h1 className="text-2xl font-bold">{item.name}</h1>
       <p className="mt-2 text-gray-600">{item.description}</p>
-      <p className="mt-2">Pickup Location: <strong>{item.pickup_location || "N/A"}</strong></p>
+      <p className="mt-2">Pickup Location: <strong>{item.pickup_location}</strong></p>
       <p>Expiry Date: {item.expiry_date}</p>
       <p>Quantity Available: {item.quantity}</p>
       <QuantityClaim
         maxQty={item.quantity}
-        onClaim={onClaim}
+        onClaim={claimItem}
       />
     </div>
   </LayoutWrapper>
