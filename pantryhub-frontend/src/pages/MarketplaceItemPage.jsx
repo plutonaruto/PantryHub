@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import QuantityClaim from '../components/shared/QuantityClaim';
+import toast from 'react-hot-toast';
 
 export default function MarketplaceItemPage() {
   const { id } = useParams();
@@ -29,6 +30,8 @@ export default function MarketplaceItemPage() {
         quantity: prev.quantity - qty,
         claimed: prev.quantity - qty === 0,
       }));
+
+      toast.success(`Claimed ${qty} items! \nInstructions: ${item.instructions}`);
     } catch (err) {
       console.error('Error claiming item:', err);
     }

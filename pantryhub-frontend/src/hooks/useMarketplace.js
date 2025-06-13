@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export function useMarketplace() {
   const [items, setItems] = useState([]);
@@ -99,6 +100,9 @@ export function useMarketplace() {
         updated[index].quantity = remainingQty;
         setItems(updated);
       }
+
+      toast.success(`Claimed ${quantityToClaim} items! \nInstructions: ${item.instructions}`);
+
     } catch (err) {
       console.error("Failed to update item:", err.response?.data || err.message);
     }
