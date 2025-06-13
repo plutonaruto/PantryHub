@@ -121,6 +121,21 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
+          Pickup Instructions
+        </label>
+        <textarea
+          name="instructions"
+          placeholder="Be as descriptive as possible! eg. Pickup from Level 3 pantry fridge, white container wth red lid."
+          value={formData.instructions}
+          onChange={handleFormChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          rows={3}
+          required
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Item Image
         </label>
         <input 

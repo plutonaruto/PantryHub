@@ -113,6 +113,7 @@ class MarketplaceItem(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     description = db.Column(db.Text, nullable=True)
     claimed = db.Column(db.Boolean, default=False)
+    instructions = db.Column(db.Text, nullable=False)
     pickup_location = db.Column(db.String(100), nullable=True)
 
     def __repr__(self): # for debugging
@@ -256,7 +257,7 @@ def create_marketitem():
         file.save(image_path)
         image_path = f"/uploads/{filename}" #create url
 
-    required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
+    required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date', 'pickup_location', 'instructions']
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
@@ -272,6 +273,7 @@ def create_marketitem():
             created_at=datetime.utcnow(),
             description=data.get('description', ''), #use .get in case its missing
             claimed=False,
+            instructions=data['instructions'],
             pickup_location=data['pickup_location']
             
         )
@@ -327,6 +329,8 @@ def patch(market_item_id):
         market_item.expiry_date = datetime.strptime(data['expiry_date'], '%Y-%m-%d').date()
     if 'description' in data:
         market_item.description = data['description']
+    if 'instructions' in data:
+        market_item.instructions = data['instructions']
     if 'pickup_location' in data:
         market_item.pickup_location = data['pickup_location']
     if 'claimed' in data:
@@ -356,7 +360,9 @@ def get_marketplace_item(item_id):
         "expiry_date": item.expiry_date.strftime('%Y-%m-%d'),
         "description": item.description,
         "image_url": item.image_url or "/placeholder.jpg",
-        "claimed": item.claimed
+        "claimed": item.claimed,
+        "instructions": item.instructions
+
     }), 200
 
 
@@ -378,7 +384,8 @@ def get_marketplace_items():
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
             "description": item.description,
             "imageUrl": item.image_url or "/placeholder.jpg",
-            "claimed": item.claimed
+            "claimed": item.claimed,
+            "instructions": item.instructions
         })
     return jsonify(result), 200
 
