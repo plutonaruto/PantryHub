@@ -1,19 +1,16 @@
-// src/Profile.js
 import React from "react";
 import { useAuth } from "../firebase/AuthProvider";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth() || {};
 
   if (!user) return null;
 
   return (
     <div>
       <h2>User Profile</h2>
-      <p><strong>Name:</strong> {user.email}</p>
-      <p><strong>Age:</strong> {user.age}</p>
-      <p><strong>Gender:</strong> {user.gender}</p>
-      <p><strong>Address:</strong> {user.address}</p>
+      <p><strong>Name:</strong> {user.name}</p>
+      <p><strong>Email:</strong> {user.email}</p>
       <button onClick={logout}>Log Out</button>
     </div>
   );

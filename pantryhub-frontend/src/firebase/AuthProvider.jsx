@@ -1,15 +1,14 @@
-// src/AuthProvider.js
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "./firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const AuthContext = createContext();
+const AuthContext = createContext(); // share auth state w/ app (user, signup, login)
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext); //accesss authcontext (user, signup, login, logout) abt curr user
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+export const AuthProvider = ({ children }) => { //authprovider provides auth context to app--> wrap inside authcontext
+  const [user, setUser] = useState(null); //holds users curr info--> initally null cuz no one logged in
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -26,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const signup = (email, password, userData) =>
     createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
       const { uid } = userCredential.user;
+      console.log("signup button clicked");
       await setDoc(doc(db, "users", uid), userData);
     });
 

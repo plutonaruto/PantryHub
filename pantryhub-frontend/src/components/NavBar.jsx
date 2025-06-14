@@ -21,6 +21,10 @@ const NavBar = () => {
             <Link to="/marketplace" className="nav-link">
               Marketplace
             </Link>
+            <Link to="/profile" className="nav-link">
+              Profile
+            </Link>
+
           </nav>
         </div>
       </div>

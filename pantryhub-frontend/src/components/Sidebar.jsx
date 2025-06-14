@@ -16,6 +16,7 @@ export default function Sidebar() {
                 <Link to="/" className="nav-link">Home</Link>
                 <Link to="/inventory" className="nav-link">Inventory</Link>
                 <Link to="/marketplace" className="nav-link">Marketplace</Link>
+                <Link to="/profile" className="nav-link">Profile</Link>
 
             </nav>
            </div>

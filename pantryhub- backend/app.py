@@ -1,5 +1,8 @@
 import os
 import firebase_admin
+from firebase_admin import credentials, auth, app_check
+import flask
+import jwt
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -12,10 +15,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.sql import func
 from flask_migrate import Migrate
 from flask import send_from_directory
-from firebase_admin import credentials, auth
 from auth.auth_helper import login_required
-from auth.roleMiddleware import check_role
-
 
 
 load_dotenv()
@@ -23,15 +23,35 @@ load_dotenv()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+
 
 #login/register
 #SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
 #cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
 
 os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-firebase_admin.initialize_app()               
+firebase_app = firebase_admin.initialize_app() # allow backend to access firebase services
 
+
+@app.before_request
+def verify_token():
+    if request.method == "OPTIONS":
+        return None
+     # Get token from Authorization header
+    token = request.headers.get('Authorization', '').split('Bearer ')[-1]
+    if not token:
+        return jsonify({"error": "Token is missing"}), 400
+
+    try:
+        # Verify Firebase ID token
+        decoded_token = auth.verify_id_token(token)
+        request.user_id = decoded_token['uid']  # Add user UID to request context
+    except Exception as e:
+        return jsonify({"error": "Invalid token"}), 401  # Unauthorized if token is invalid
+
+
+'''
 @app.route('/verify', methods = ['POST'])
 def verify_token():
     id_token = request.json.get("id_token")
@@ -46,23 +66,24 @@ def verify_token():
     
     except auth.InvalidIdTokenError:
         return jsonify({"error": "Invalid token"}), 401
+'''
 
 @app.route('/register', methods=['POST'])
 def register_user():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    name = data.get('name')
     try:
         user = auth.create_user(
             email=email,
             password=password,
+            name=name
         )
         return jsonify({"message": f"User {user.uid} created successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     
-
-
 
 UPLOADED_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -130,7 +151,7 @@ with app.app_context():
 
 @app.route('/items', methods=['POST'])
 @login_required
-@check_role("create")
+#@check_role("create")
 def create():
     data = request.form.to_dict()
     print("Received FORM:", data)
@@ -169,11 +190,12 @@ def create():
     except Exception as e:
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
-@app.route('/items/<string:item_name>', methods=['GET'])
+'''
+@app.route('/items/<int:item_id>', methods=['GET'])
 @login_required
 @check_role("get")
-def get(item_name):
-    item = Item.query.get(item_name)
+def get(item_id):
+    item = Item.query.get(item_id)
     if not item:
         return jsonify({"error": "Item not found"}), 404
 
@@ -187,11 +209,12 @@ def get(item_name):
         "image_url": item.image_url,
         "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None
     })
+'''
 
 #delete an item
 @app.route('/items/<int:item_id>', methods=['DELETE'])
 @login_required
-@check_role("delete")
+#@check_role("delete")
 def delete(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -205,7 +228,7 @@ def delete(item_id):
 #update qty of item
 @app.route('/items/<int:item_id>', methods=['PUT'])
 @login_required
-@check_role("edit")
+#@check_role("edit")
 def update_quantity(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -224,12 +247,11 @@ def update_quantity(item_id):
 
 
 #fetch all items for user 
-@app.route('/items/<int:owner_id>', methods=['GET'])
+@app.route('/items/<string:owner_id>', methods=['GET'])
 @login_required
-@check_role("view_own_items")
-def get_all_items():
-    user = g.current_user
-    items = Item.query.filter_by(owner_id=user['uid'].all())
+#@check_role("view_own_items")
+def get_all_items(owner_id):
+    items = Item.query.filter_by(owner_id= owner_id)
     result = []
     for item in items:
         result.append({
@@ -243,12 +265,12 @@ def get_all_items():
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
         })
     return jsonify(result), 200
-
+'''
 #fetch all items for admin
 @app.route('/items/admin', methods=['GET'])
 @login_required
 @check_role("view_all_items")
-def get_all_items():
+def get_all_items_admin():
     items = Item.query.all()
     result = []
     for item in items:
@@ -263,7 +285,7 @@ def get_all_items():
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
         })
     return jsonify(result), 200
-
+'''
 
 # ----------------------
 # Marketplace Endpoints

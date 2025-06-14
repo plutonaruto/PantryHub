@@ -19,8 +19,11 @@ def login_required(f):
             return jsonify({"error": "Invalid or expired token"}), 401
         
         g.user_id = decoded["uid"]
+        g.current_user = decoded
         return f(*args, **kwargs)
     return wrapper
+
+
     
 
 

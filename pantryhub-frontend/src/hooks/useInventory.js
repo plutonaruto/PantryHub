@@ -1,14 +1,19 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { fetchWithAuth } from "../firebase/fetchWithAuth";
+import { api } from '../api';
+import { getAuth } from "firebase/auth";
+
 
 export function useInventory() {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({ name: '', expiry: '', quantity: 1, image: null });
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const ownerId = user ? user.uid : null;
 
   const fetchItems = async () => {
     try {
-      const data = await fetchWithAuth("http://localhost:5000/items");
+      const data = await api.getUserItems(ownerId);
       setItems(data);
     } catch (err) {
       console.error("Error fetching items:", err);
@@ -30,14 +35,10 @@ export function useInventory() {
     
   
     try {
-      await fetchWithAuth("http://localhost:5000/items", {
-        method: "POST",
-        headers: {},
-        body: formDataToSend        
+      await api.createItem(formDataToSend);
+    
 
-      });
-
-      const data = await fetchWithAuth("http://localhost:5000/items");
+      const data = await api.getUserItems(ownerId);
       setItems(data);
       setFormData({ name: '', expiry: '', quantity: 1, image: null });
     } catch (err) {
@@ -63,9 +64,9 @@ export function useInventory() {
     setItems(newItems);
   }
 
-  const fetchItem= async() => {
+  const fetchItem = async(itemId) => {
     try{
-      const data = await fetchWithAuth(`http://localhost:5000/items/${item.id}`);
+      const data = await api.fetchItem(itemId);;
       setItems(data)
 
     } catch (err) {
@@ -80,9 +81,7 @@ export function useInventory() {
   
   try {
     // Send DELETE request to remove the item from the backend
-    await fetchWithAuth(`http://localhost:5000/items/${itemId}` , {
-      method: "DELETE"
-    });
+    await api.deleteItem(itemId);
     const updatedItems = items.filter((_, i) => i !== index);  // Filter out the deleted item
     setItems(updatedItems);  // Update the state with the new list
   } catch (err) {
@@ -90,9 +89,18 @@ export function useInventory() {
   }
 };
 
+const updateItem = async (itemId, updates) => {
+  try {
+    await api.updateItem(itemId, updates);
+    // Optionally refresh items or update state
+  } catch (err) {
+    console.error("Failed to update item:", err);
+  }
+};
+
   useEffect(() => {
     fetchItems();
   }, []);
 
-  return { items, formData, addItem, updateForm, onImageChange, setItems, adjustQty, removeItem, fetchItem};
+  return { items, formData, addItem, updateForm, onImageChange, setItems, adjustQty, removeItem, fetchItem, updateItem};
 }
