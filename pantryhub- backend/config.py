@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()  
 
-DB_USER = os.getenv('DB_USER', 'appuser')   
-DB_PASS = os.getenv('DB_PASS', 'pantryhub101')           
+DB_USER = os.getenv('DB_USER', 'postgres')   
+DB_PASS = os.getenv('DB_PASS', 'dagger')           
 DB_HOST = os.getenv('DB_HOST', 'localhost')  
 DB_NAME = os.getenv('DB_NAME', 'pantryhub')  
 
