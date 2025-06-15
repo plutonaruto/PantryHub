@@ -11,28 +11,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Toaster
       position="top-center"
       reverseOrder={false}
-      toastOptions={{
-        duration: 4000,
-        style: {
-          background: '#fff',
-          color: '#333',
-          border: '1px solid #ccc',
-          padding: '12px',
-          fontSize: '14px',
-        },
-        success: {
-          style: {
-            background: '#d1fae5',
-            color: '#065f46',
-          },
-        },
-        error: {
-          style: {
-            background: '#fee2e2',
-            color: '#991b1b',
-          },
-        },
-      }}
     />
   </React.StrictMode>,
 );

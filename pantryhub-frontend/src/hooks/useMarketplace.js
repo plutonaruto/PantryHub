@@ -83,7 +83,6 @@ export function useMarketplace() {
 
     try {
       if (remainingQty <= 0) {
-        // mark as claimed and remove item
         await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
           quantity: 0,
           claimed: true
@@ -92,7 +91,6 @@ export function useMarketplace() {
         updated.splice(index, 1);
         setItems(updated);
       } else {
-        // Just update quantity
         await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
           quantity: remainingQty
         });
@@ -101,12 +99,14 @@ export function useMarketplace() {
         setItems(updated);
       }
 
-      toast.success(`Claimed ${quantityToClaim} items! \nInstructions: ${item.instructions}`);
+      return { success: true, instructions: item.instructions, claimedQty: quantityToClaim };
 
     } catch (err) {
       console.error("Failed to update item:", err.response?.data || err.message);
+      return { success: false, error: err };
     }
   };
+
 
 
 

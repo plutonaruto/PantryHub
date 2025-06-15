@@ -29,18 +29,11 @@ export default function MarketplaceItemCard({ item, onClaim }) {
           More Info
         </button>
       </div>
-      <div className="flex items-center gap-2">
-        <QuantityClaim
-          maxQty={item.quantity}
-          onClaim={onClaim}
-        />
-        {/* debugging 
-        <h3 className="text-lg font-bold text-gray-800">
-          (ID: {item.id})
-        </h3> */}
-
-      </div>
-      {warning && <p className="text-sm text-red-500 mt-1">{warning}</p>}
+      <QuantityClaim
+        maxQty={item.quantity}
+        onClaim={onClaim}
+        instructions={item.instructions}
+      />
     </div>
   );
 }

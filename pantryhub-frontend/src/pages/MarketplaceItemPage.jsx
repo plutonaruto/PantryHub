@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import QuantityClaim from '../components/shared/QuantityClaim';
-import toast from 'react-hot-toast';
 
 export default function MarketplaceItemPage() {
   const { id } = useParams();
@@ -15,23 +14,20 @@ export default function MarketplaceItemPage() {
       .catch(err => console.error(err));
   }, [id]);
 
-  const claimItem = async (qty) => {
+  const onClaim = async (qty) => {
     if (!item || qty > item.quantity) return;
 
     try {
-      const response = await axios.patch(`http://localhost:5000/marketplace/${id}`, {
+      await axios.patch(`http://localhost:5000/marketplace/${id}`, {
         quantity: item.quantity - qty,
         claimed: item.quantity - qty === 0,
       });
 
-      // update state locally
       setItem(prev => ({
         ...prev,
         quantity: prev.quantity - qty,
         claimed: prev.quantity - qty === 0,
       }));
-
-      toast.success(`Claimed ${qty} items! \nInstructions: ${item.instructions}`);
     } catch (err) {
       console.error('Error claiming item:', err);
     }
@@ -50,7 +46,8 @@ export default function MarketplaceItemPage() {
       <p>Quantity Available: {item.quantity}</p>
       <QuantityClaim
         maxQty={item.quantity}
-        onClaim={claimItem}
+        onClaim={onClaim}
+        instructions={item.instructions}
       />
     </div>
   </LayoutWrapper>
