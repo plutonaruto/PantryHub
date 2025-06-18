@@ -23,7 +23,8 @@ def upgrade():
         batch_op.alter_column('owner_id',
                existing_type=sa.INTEGER(),
                type_=sa.String(),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using="owner_id::text" )
         batch_op.drop_column('pickup_location')
 
     # ### end Alembic commands ###

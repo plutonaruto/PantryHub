@@ -22,13 +22,15 @@ def upgrade():
         batch_op.alter_column('owner_id',
                existing_type=sa.INTEGER(),
                type_=sa.String(),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using="owner_id::text")
 
     with op.batch_alter_table('marketplace_item', schema=None) as batch_op:
         batch_op.alter_column('owner_id',
                existing_type=sa.VARCHAR(),
                type_=sa.Integer(),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using="owner_id::integer")
 
     # ### end Alembic commands ###
 
@@ -39,12 +41,14 @@ def downgrade():
         batch_op.alter_column('owner_id',
                existing_type=sa.Integer(),
                type_=sa.VARCHAR(),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using="owner_id::text")
 
     with op.batch_alter_table('item', schema=None) as batch_op:
         batch_op.alter_column('owner_id',
                existing_type=sa.String(),
                type_=sa.INTEGER(),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using="owner_id::integer")
 
     # ### end Alembic commands ###

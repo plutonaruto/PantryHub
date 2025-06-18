@@ -18,6 +18,9 @@ from flask import send_from_directory
 from auth.auth_helper import login_required
 
 
+os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
+firebase_app = firebase_admin.initialize_app() # allow backend to access firebase services
+
 load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -25,31 +28,25 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
-
-#login/register
-#SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
-#cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
-
-os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-firebase_app = firebase_admin.initialize_app() # allow backend to access firebase services
-
-
 @app.before_request
 def verify_token():
     if request.method == "OPTIONS":
         return None
-     # Get token from Authorization header
-    token = request.headers.get('Authorization', '').split('Bearer ')[-1]
-    if not token:
-        return jsonify({"error": "Token is missing"}), 400
-
+    if request.path in ['/register']:
+        return None
+    auth_header = request.headers.get('Authorization', '')
+    print("Authorization header:", auth_header)
+    if not auth_header.startswith('Bearer '):
+        return jsonify({"error": "Token is missing"}), 401
+    token = auth_header.split('Bearer ')[1]
     try:
-        # Verify Firebase ID token
         decoded_token = auth.verify_id_token(token)
-        request.user_id = decoded_token['uid']  # Add user UID to request context
+        request.user_id = decoded_token['uid']
     except Exception as e:
-        return jsonify({"error": "Invalid token"}), 401  # Unauthorized if token is invalid
-
+        print("Token verification failed:", str(e))
+        return jsonify({"error": "Invalid token"}), 401  # Unauthorized if token is 
+    
+    print("Authorization header:", request.headers.get('Authorization'))
 
 '''
 @app.route('/verify', methods = ['POST'])
@@ -111,11 +108,11 @@ def uploaded_file(filename):
 
 # Inventory table
 class Item(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True) #item id
     name = db.Column(db.String(150), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     room_no = db.Column(db.String(50), nullable=False)
-    owner_id = db.Column(db.Integer, nullable=False)
+    owner_id = db.Column(db.String, nullable=False) # user/owner id
     pantry_id = db.Column(db.Integer, nullable=False)
     expiry_date = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -130,7 +127,7 @@ class MarketplaceItem(db.Model):
     name = db.Column(db.String(150), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     room_no = db.Column(db.String(50), nullable=False)
-    owner_id = db.Column(db.Integer, nullable=False)
+    owner_id = db.Column(db.String, nullable=False)
     pantry_id = db.Column(db.Integer, nullable=False)
     expiry_date = db.Column(db.Date, nullable=True)
     image_url = db.Column(db.String, nullable=True)
@@ -316,7 +313,7 @@ def create_marketitem():
             name=data['name'],
             quantity=int(data.get('quantity', 1)),
             room_no=data['room_no'],
-            owner_id=int(data['owner_id']),
+            owner_id=data['owner_id'],
             pantry_id=int(data['pantry_id']),
             image_url = image_path, 
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
@@ -409,6 +406,6 @@ def get_marketplace_items():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=3000)
 
 

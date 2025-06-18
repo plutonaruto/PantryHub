@@ -29,7 +29,7 @@ export function useInventory() {
     formDataToSend.append('expiry_date', formData.expiry);
     formDataToSend.append('quantity', formData.quantity);
     formDataToSend.append('room_no', "101");  // dummy data for room_no
-    formDataToSend.append('owner_id', 1);     // dummy data for owner_id
+    formDataToSend.append('owner_id', ownerId);     // dummy data for owner_id
     formDataToSend.append('pantry_id', 1);    // dummy data for pantry_id
 
     

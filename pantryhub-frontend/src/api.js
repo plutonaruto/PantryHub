@@ -1,17 +1,34 @@
+// not linked to /inventory which is not a backend endpoint
 import { getAuth } from "firebase/auth";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "http://localhost:3000";
 
 async function getAuthToken() {
   const auth = getAuth();
   const user = auth.currentUser;
-  if (!user) throw new Error("No authenticated user");
-  return await user.getIdToken(true);
+  if (!user) {
+    window.location.href = "/register";
+    return null;
+  }
+
+  try {
+    const idToken = await user.getIdToken();
+    console.log("idToken:", idToken);
+    return idToken;
+  } catch (error) {
+    console.error("Error in fetching ID token:", error);
+    return null;
+  }
 }
 
 async function makeAuthenticatedRequest(endpoint, method = 'GET', body = null) {
     try {
         const idToken = await getAuthToken(); //get firebase id token
+        console.log("idToken:", idToken);
+        if (!idToken) {
+            console.error("ID Token is missing. Redirecting to login...");
+            return;
+        }
 
         const headers = {
             "Authorization" : `Bearer ${idToken}`, 
@@ -20,6 +37,7 @@ async function makeAuthenticatedRequest(endpoint, method = 'GET', body = null) {
         const config = {
             method,
             headers,
+            credentials: 'include',
         };
 
         if (body) {
@@ -63,5 +81,3 @@ export const api = {
   createMarketplaceItem: (itemData) => makeAuthenticatedRequest('/marketplace', 'POST', itemData),
   updateMarketplaceItem: (itemId, updates) => makeAuthenticatedRequest(`/marketplace/${itemId}`, 'PATCH', updates),
 };
-
-// 
