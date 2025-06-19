@@ -25,6 +25,9 @@ export const AuthProvider = ({ children }) => { //authprovider provides auth con
   const signup = (email, password, userData) =>
     createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
       const { uid } = userCredential.user;
+      if (userData.name) {
+        await updateProfile(userCredential.user, { displayName: userData.name });
+      }
       console.log("signup button clicked");
       await setDoc(doc(db, "users", uid), userData);
     });

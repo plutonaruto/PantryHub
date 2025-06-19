@@ -4,9 +4,12 @@ import ItemCard from './cards/ItemCard';
 import { useState, useEffect } from 'react';
 import cart from '../assets/cart.png';
 import Topbar from '../components/layout/Topbar';
+import { ShoppingCart } from 'lucide-react';
+import { useAuth } from "../firebase/AuthProvider";
 
 
-export default function InventoryView({name, items = [] }) {
+
+export default function InventoryView({items = [], onSearchChange = () => {}, onPostItem = () => {}}) {
     const [updatedItems, setUpdatedItems] = useState(items);
     const [expiringItems, setExpiringItems] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -16,13 +19,20 @@ export default function InventoryView({name, items = [] }) {
   const handleSearchChange = (e) => { setSearchQuery(e.target.value); };
   const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-
+{/*}
   const onAdjustQty = (index, delta) => {
     const newItems = [...updatedItems];
     const newQuantity = Math.max(1, newItems[index].quantity + delta);
     newItems[index].quantity = newQuantity;
     setUpdatedItems(newItems);
   };
+  */}
+
+const { user } = useAuth() || {};
+
+if (!user) return null;
+
+  
 
   useEffect(() => {
     const today = new Date();
@@ -50,14 +60,15 @@ export default function InventoryView({name, items = [] }) {
     <div className="flex flex-col gap-4"> {/* Unified vertical spacing */}
       {/* Hero Section */}
       <div className="hero-banner flex flex-col justify-between text-white mb-4">
-        <h1 className="text-3xl font-bold mb-2">Welcome Back, {name}!</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome Back, {user.name}!</h1>
         <p className="text-white text-opacity-90">What would you like to do today?</p>
       </div>
 
       <div className = "flex flex-col mb-6 mt-6">
         <Topbar
         searchQuery={searchQuery}
-         onSearchChange={handleSearchChange}/>
+        onSearchChange={handleSearchChange}
+        onPostItem = {onPostItem}/>
       </div>
 
       {/* Content Section */}
@@ -67,18 +78,31 @@ export default function InventoryView({name, items = [] }) {
           <h2 className="text-lg font-bold text-black flex items-center mb-4">
             Your Inventory <FaChevronRight className="ml-1" />
           </h2>
-          <div className="grid grid-cols-3 gap-4">
-            {items.map((item, i) => (
-              <Link to={`/item/${item.id}`} key={item.id}>
-                <ItemCard
-                  item={item}
-                  onIncrement={() => onAdjustQty(i, 1)}
-                  onDecrement={() => onAdjustQty(i, -1)}
+
+          {filteredItems.length === 0 ? (
+            <div className="bg-white p-8 rounded-lg shadow text-center">
+              <ShoppingCart size={48} className="mx-auto text-gray-300 mb-4" />
+              <h3 className="text-xl font-medium text-gray-700 mb-2">No items found</h3>
+              <p className="text-gray-500">
+                {searchQuery 
+                  ? `No items match your search for "${searchQuery}"`
+                  : "Your inventory empty. Start adding items!"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+              {filteredItems.map((item, index) => (
+                <ItemCard 
+                  key={item.id} 
+                  item={item} 
+                  onClaim={(qty) => claimItem(index, qty)} 
                 />
-              </Link>
-            ))}
+              ))}
+              
+
           </div>
-        </div>
+          )}
+          </div>
 
         {/* Right Column */}
         <div className="w-[300px] flex flex-col gap-4 mx-4">
@@ -98,8 +122,8 @@ export default function InventoryView({name, items = [] }) {
           </div>
 
           {/* Marketplace Link */}
-          <div className="flex flex-col bg-[#9C6B98] container rounded-full text-center gap-2 items-center justify-center mt-6">
-            <img src={cart} alt="Cart" className="h-5 w-5 object-contain max-w-[60px]"></img>
+          <div className="flex flex-col bg-[#9C6B98] container rounded-xl text-center gap-2 items-center justify-center mt-6 p-3">
+            <img src={cart} alt="Cart" className="h-20 w-20 object-contain max-w-[60px]"></img>
             <Link to="/marketplace">
               <button className="text-white bg-white/20 px-4 py-2 rounded-full flex items-center justify-center gap-2">
                 Explore Marketplace <FaChevronRight />

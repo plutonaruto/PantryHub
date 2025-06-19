@@ -1,15 +1,13 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { api } from '../api';
-import { getAuth } from "firebase/auth";
+
 
 
 export function useInventory() {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({ name: '', expiry: '', quantity: 1, image: null });
-  const auth = getAuth();
-  const user = auth.currentUser;
-  const ownerId = user ? user.uid : null;
+
 
   const fetchItems = async () => {
     try {
