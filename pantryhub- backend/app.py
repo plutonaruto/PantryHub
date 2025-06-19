@@ -19,9 +19,13 @@ from auth.auth_helper import login_required
 
 
 os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-firebase_app = firebase_admin.initialize_app() # allow backend to access firebase services
+firebase_app = firebase_admin.initialize_app(options={
+    "projectId": "pantryhub-login-and-flow"
+}) 
 
 load_dotenv()
+
+os.environ["GOOGLE_CLOUD_PROJECT"] = "pantryhub-login-and-flow"
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -248,20 +252,25 @@ def update_quantity(item_id):
 @login_required
 #@check_role("view_own_items")
 def get_all_items(owner_id):
-    items = Item.query.filter_by(owner_id= owner_id)
-    result = []
-    for item in items:
-        result.append({
-            "id": item.id,
-            "name": item.name,
-            "quantity": item.quantity,
-            "image_url": item.image_url,
-            "room_no": item.room_no,
-            "owner_id": item.owner_id,
-            "pantry_id": item.pantry_id,
-            "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
-        })
-    return jsonify(result), 200
+    try:
+        print("Fetching items for owner_id:", owner_id) #debug
+        items = Item.query.filter_by(owner_id= owner_id).all()
+        result = []
+        for item in items:
+            result.append({
+                "id": item.id,
+                "name": item.name,
+                "quantity": item.quantity,
+                "image_url": item.image_url,
+                "room_no": item.room_no,
+                "owner_id": item.owner_id,
+                "pantry_id": item.pantry_id,
+                "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        print("Error in GET /items/<owner_id>:", str(e))
+        return jsonify({"error": "Internal Server Error"}), 500
 '''
 #fetch all items for admin
 @app.route('/items/admin', methods=['GET'])
