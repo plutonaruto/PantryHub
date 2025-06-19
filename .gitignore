@@ -4,5 +4,6 @@ pantry-frontend/.vite/
 pantry-frontend/dist/
 
 # backend
-pantryhub- backend/.env
-pantryhub- backend/firebase-admin-key.json
+'pantryhub- backend'/.env
+'pantryhub- backend'/config.py
+'pantryhub- backend'/firebase-admin-key.json
