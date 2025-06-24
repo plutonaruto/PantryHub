@@ -45,22 +45,15 @@ export default function Inventory() {
 
     <main className="flex-1 p-6 bg-gray-50">
 
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        {items.map((item, i) => (
-          <ItemCard
-            key={i}
-            item={item}
-            onIncrement={() => adjustQty(i, 1)}
-            onDecrement={() => adjustQty(i, -1)}
-          />
-        ))}
-      </div>
 
       <div className="mt-8 ml-4 p-4">
         <InventoryView
+        items = {items}
+        onSearchChange={handleSearchChange}
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onPostItem={() => setIsFormVisible(true)} />
+      
 
       {isFormVisible && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

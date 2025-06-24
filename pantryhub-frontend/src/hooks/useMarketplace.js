@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { api } from '../api';
+import { useAuth } from '../firebase/AuthProvider'; 
 
 export function useMarketplace() {
   const [items, setItems] = useState([]);
@@ -7,9 +9,12 @@ export function useMarketplace() {
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '', expiry_date: '' , quantity: 1, image: null});
 
+  const { user } = useAuth();
+  const ownerId = user?.uid;
+
   const fetchItems = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/marketplace");
+      const res = await api.getMarketplaceItems();
       setItems(res.data);
     } catch (err) {
       console.error("Error fetching items:", err);
@@ -35,11 +40,11 @@ export function useMarketplace() {
     }
 
     try {
-      await axios.post("http://localhost:5000/marketplace", form, {
+      await api.createMarketplaceItem(form), {
         headers: {
           "Content-Type": "multipart/form-data"
         }
-      });
+      };
       await fetchItems();
       setFormData({ name: '', description: '', expiry_date: '', quantity: 1, image: null });
       return true; //success flag
@@ -52,6 +57,7 @@ export function useMarketplace() {
 
   //not used yet
   const getRecentItems = (limit = 5) => {
+    if (!Array.isArray(items)) return []; // added due to potential issues with items being undefined
     return [...items]
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
       .slice(0, limit);
@@ -81,7 +87,7 @@ export function useMarketplace() {
     try {
       if (remainingQty <= 0) {
         // mark as claimed and remove item
-        await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
+        await api.updateMarketplaceItem(item.id,{
           quantity: 0,
           claimed: true
         });
@@ -90,7 +96,7 @@ export function useMarketplace() {
         setItems(updated);
       } else {
         // Just update quantity
-        await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
+        await api.updateMarketplaceItem(item.id, {
           quantity: remainingQty
         });
         const updated = [...items];

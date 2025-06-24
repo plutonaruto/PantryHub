@@ -9,32 +9,27 @@ import { useAuth } from "../firebase/AuthProvider";
 
 
 
-export default function InventoryView({items = [], onSearchChange = () => {}, onPostItem = () => {}}) {
-    const [updatedItems, setUpdatedItems] = useState(items);
-    const [expiringItems, setExpiringItems] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isFormVisible, setIsFormVisible] = useState(false);
+export default function InventoryView({items = [], onSearchChange = () => {}, onPostItem = () => {}, onAdjustQty = () => {}, searchQuery = ""}) {
 
-  const handleSearchChange = (e) => { setSearchQuery(e.target.value); };
+  const [expiringItems, setExpiringItems] = useState([]);
+
   const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-{/*}
+{/*
   const onAdjustQty = (index, delta) => {
     const newItems = [...updatedItems];
     const newQuantity = Math.max(1, newItems[index].quantity + delta);
     newItems[index].quantity = newQuantity;
     setUpdatedItems(newItems);
   };
-  */}
-
+*/}
 const { user } = useAuth() || {};
 
 if (!user) return null;
 
   
 
-  useEffect(() => {
+useEffect(() => {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -48,13 +43,12 @@ if (!user) return null;
       );
     });
 
-
     setExpiringItems(expiring);
-    }, []);
+  }, [items]);
 
-    useEffect(() => {
-        setUpdatedItems(items); 
-    }, []);
+    //useEffect(() => {
+       // setUpdatedItems(items); 
+ //   }, []);
 
   return (
     <div className="flex flex-col gap-4"> {/* Unified vertical spacing */}
@@ -67,7 +61,7 @@ if (!user) return null;
       <div className = "flex flex-col mb-6 mt-6">
         <Topbar
         searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
+        onSearchChange={onSearchChange}
         onPostItem = {onPostItem}/>
       </div>
 
@@ -90,19 +84,21 @@ if (!user) return null;
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-              {filteredItems.map((item, index) => (
-                <ItemCard 
-                  key={item.id} 
-                  item={item} 
-                  onClaim={(qty) => claimItem(index, qty)} 
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              {filteredItems.map((item, i) => (
+                <ItemCard
+                key={i}
+                item={item}
+                onIncrement={() => adjustQty(i, 1)}
+                onDecrement={() => adjustQty(i, -1)}
+                isAdmin= {user.role === 'admin'}
                 />
-              ))}
-              
+                ))}
+            </div>
+          )} 
 
-          </div>
-          )}
-          </div>
+        </div>
+        
 
         {/* Right Column */}
         <div className="w-[300px] flex flex-col gap-4 mx-4">

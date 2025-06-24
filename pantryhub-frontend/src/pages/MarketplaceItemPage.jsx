@@ -5,6 +5,7 @@ import axios from "axios";
 export default function MarketplaceItemPage() {
   const { id } = useParams();
   const [item, setItem] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     axios.get(`http://localhost:5000/marketplace/${id}`)
@@ -23,6 +24,11 @@ export default function MarketplaceItemPage() {
       <p>Expiry Date: {item.expiry_date}</p>
       <p>Quantity Available: {item.quantity}</p>
       <button className="mt-4 bg-primary text-white px-4 py-2 rounded">Claim Now</button>
+      {user.role === 'admin' & (
+        <button className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+        Remove Item 
+        </button>
+      )}
     </div>
   );
 }

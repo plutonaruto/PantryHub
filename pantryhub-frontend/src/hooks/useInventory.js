@@ -11,14 +11,19 @@ export function useInventory() {
   const ownerId = user?.uid;
 
 
-  const fetchItems = async () => {
-    try {
-      const data = await api.getUserItems(ownerId);
-      setItems(data);
-    } catch (err) {
-      console.error("Error fetching items:", err);
+ const fetchItems = async () => {
+  try {
+    let data;
+    if (user.role === 'admin') {
+      data = await api.getAllItems();
+    } else {
+      data = await api.getUserItems(ownerId);
     }
-  };
+    setItems(data);
+  } catch (err) {
+    console.error("Error fetching items:", err);
+  }
+};
 
   const addItem = async (e) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "./firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const AuthContext = createContext(); // share auth state w/ app (user, signup, login)
@@ -29,7 +29,8 @@ export const AuthProvider = ({ children }) => { //authprovider provides auth con
         await updateProfile(userCredential.user, { displayName: userData.name });
       }
       console.log("signup button clicked");
-      await setDoc(doc(db, "users", uid), userData);
+      await setDoc(doc(db, "users", uid), {...userData, role: "user" }).catch(err => console.error("Firestore error:", err));; 
+      // alw assign role user upon signup, manually change to admin in firestore
     });
 
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);

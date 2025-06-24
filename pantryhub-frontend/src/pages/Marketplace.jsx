@@ -27,9 +27,9 @@ const Marketplace = () => {
     setSearchQuery(e.target.value);
   };
 
-  const filteredItems = items.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItems = Array.isArray(items)
+  ? items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  : [];
 
   const handleSubmit = async (e) => {
     e.preventDefault();

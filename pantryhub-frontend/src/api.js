@@ -67,17 +67,19 @@ async function makeAuthenticatedRequest(endpoint, method = 'GET', body = null) {
 export const api = {
   // Inventory endpoints
   // You must provide the owner_id when fetching all items for a user
+  getAllItems: () => makeAuthenticatedRequest('/items'),
   getUserItems: (ownerId) => makeAuthenticatedRequest(`/items/${ownerId}`),
   fetchItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`),
   createItem: (itemData) => makeAuthenticatedRequest('/items', 'POST', itemData),
   updateItem: (itemId, updates) => makeAuthenticatedRequest(`/items/${itemId}`, 'PUT', updates),
   deleteItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`, 'DELETE'),
 
-  // Admin: fetch all items
-  //getAllItemsAdmin: () => makeAuthenticatedRequest('/items/admin'),
-
   // Marketplace endpoints
   getMarketplaceItems: () => makeAuthenticatedRequest('/marketplace'),
   createMarketplaceItem: (itemData) => makeAuthenticatedRequest('/marketplace', 'POST', itemData),
   updateMarketplaceItem: (itemId, updates) => makeAuthenticatedRequest(`/marketplace/${itemId}`, 'PATCH', updates),
+
+  // Equipment endpoints
+  createEquipment: (equipmentData) => makeAuthenticatedRequest('/equipment', 'POST', equipmentData),
+  getAllEquipment: () => makeAuthenticatedRequest('/equipment'),
 };
