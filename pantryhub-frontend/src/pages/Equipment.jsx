@@ -6,8 +6,7 @@ import CustomisedTopBar from '../components/layout/CustomisedTopBar';
 import { useAuth } from "../firebase/AuthProvider";
 import { api } from '../api';
 import { useEquipment } from '../hooks/useEquipment';
-import { X } from 'lucide-react';
-
+import { CookingPot, X } from 'lucide-react';
 
 
 export default function Equipment() {
@@ -82,7 +81,17 @@ export default function Equipment() {
                         </div>
                     </div>
     )}
-                
+              { filteredItems.length === 0 ? (
+                <div className="bg-white px-12 py-8 rounded-lg shadow text-center">
+                  <CookingPot size={48} className="mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-xl font-medium text-gray-700 mb-2">No items found</h3>
+                  <p className="text-gray-500">
+                    {searchQuery 
+                    ? `No items match your search for "${searchQuery}"`
+                    : "No available equipment!"}
+                    </p>
+                </div>
+                ) : (
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 px-4">
                     {filteredItems.map((equipment, index) => (
@@ -96,6 +105,7 @@ export default function Equipment() {
                 />
               ))}
             </div>
+            )}
         </div>
     </div>
 
