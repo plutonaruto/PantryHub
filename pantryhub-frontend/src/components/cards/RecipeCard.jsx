@@ -1,13 +1,34 @@
-export default function RecipeCard({ recipe }) {
+export default function RecipeCard({ recipe, onUnsave, onView }) {
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm flex flex-col items-center text-center">
-      <img src={recipe.image} alt={recipe.name} className="h-24 object-cover mb-4" />
-      <h3 className="font-semibold text-lg">{recipe.name}</h3>
-      <p className="text-sm text-gray-600">Servings: {recipe.servings}</p>
-      <div className="flex flex-col gap-2 mt-3 w-full">
-        <button className="bg-purple-600 text-white py-1 rounded-md">Save</button>
-        <button className="border border-purple-600 text-purple-600 py-1 rounded-md">See Full Recipe</button>
+    <div className="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+      <div>
+        <h3 className="text-lg font-semibold mb-2">{recipe.name}</h3>
+        <ul className="list-disc list-inside mb-4">
+          {recipe.ingredients.map((ing, i) => (
+            <li key={i}>{ing}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="flex gap-2 mt-2">
+        {onView && (
+          <button
+            className="flex-1 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+            onClick={onView}
+          >
+            See Full Recipe
+          </button>
+        )}
+        {onUnsave && (
+          <button
+            className="flex-1 px-4 py-2 bg-primary text-white rounded hover:bg-red-400"
+            onClick={onUnsave}
+          >
+            Unsave
+          </button>
+        )}
       </div>
     </div>
   );
 }
+

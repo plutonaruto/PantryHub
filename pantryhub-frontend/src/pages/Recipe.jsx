@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import HeroBanner from '../components/layout/HeroBanner';
 import RecipeCard from '../components/cards/RecipeCard';
@@ -6,7 +7,17 @@ import { useRecipe } from '../hooks/useRecipe';
 import { ChefHat, X } from 'lucide-react';
 
 export default function RecipePage() {
-  const { savedRecipes, availableIngredients, generateRecipes } = useRecipe();
+  const { availableIngredients, generateRecipes } = useRecipe();
+  const [savedRecipes, setSavedRecipes] = useState([
+    {
+      name: "Tomato Soup",
+      ingredients: [
+        "2 cups diced tomatoes",
+        "1 cup vegetable broth",
+        "Salt & pepper"
+      ]
+    },
+  ]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (e) => {
@@ -17,12 +28,20 @@ export default function RecipePage() {
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleUnsave = (recipeIndex) => {
+    setSavedRecipes((prev) =>
+      prev.filter((_, idx) => idx !== recipeIndex)
+    );
+  };
+
+  const navigate = useNavigate();
+
   return (
     <LayoutWrapper
       showTopbar={true}
       searchQuery={searchQuery}
       onSearchChange={handleSearchChange}
-      onPostItem={() => generateRecipes()}
+      onPostItem={() => navigate("/recipes/generate")}
       postButtonLabel="Generate"
     >
       <div className="container mx-auto px-4 py-8">
@@ -48,7 +67,11 @@ export default function RecipePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {filteredRecipes.map((recipe, index) => (
-                <RecipeCard key={index} recipe={recipe} />
+                <RecipeCard 
+                  key={index} 
+                  recipe={recipe}
+                  onUnsave={() => handleUnsave(index)} 
+                />
               ))}
             </div>
           )}
