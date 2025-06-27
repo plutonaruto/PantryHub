@@ -2,7 +2,7 @@ import React from 'react';
 import NavBar from '../NavBar';
 import Topbar from './Topbar';
 
-const LayoutWrapper = ({ children, showTopbar = false, searchQuery = '', onSearchChange = () => {}, onPostItem = () => {} }) => {
+const LayoutWrapper = ({ children, showTopbar = false, searchQuery = '', onSearchChange = () => {}, onPostItem = () => {}, postButtonLabel }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <NavBar />
@@ -11,6 +11,7 @@ const LayoutWrapper = ({ children, showTopbar = false, searchQuery = '', onSearc
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
           onPostItem={onPostItem}
+          postButtonLabel={postButtonLabel}
         />
       )}
       {children}

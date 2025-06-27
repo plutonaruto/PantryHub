@@ -21,6 +21,9 @@ const NavBar = () => {
             <Link to="/marketplace" className="nav-link">
               Marketplace
             </Link>
+            <Link to ="/recipes" className="nav-link">
+              Recipes
+            </Link>
           </nav>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, Plus } from 'lucide-react';
 
-const Topbar = ({ searchQuery, onSearchChange, onPostItem }) => {
+const Topbar = ({ searchQuery, onSearchChange, onPostItem, postButtonLabel}) => {
   return (
     <div className="topbar">
       <div className="container mx-auto px-4">
@@ -23,7 +23,7 @@ const Topbar = ({ searchQuery, onSearchChange, onPostItem }) => {
               onClick={onPostItem}
             >
               <Plus size={18} />
-              Post an Item
+              {postButtonLabel || 'Post an Item'}
             </button>
           </div>
         </div>
