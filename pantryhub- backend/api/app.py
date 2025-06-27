@@ -1,4 +1,8 @@
+import sys
 import os
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+
 import firebase_admin
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -66,12 +70,11 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOADED_FOLDER'] = UPLOADED_FOLDER
 app.config['MAX_PHOTO_SIZE'] = 16 * 1024 * 1024
 
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f"postgresql+psycopg2://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}"
-    f"@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+print("DB URL:", app.config['SQLALCHEMY_DATABASE_URI'])
 
 db = SQLAlchemy(app) #interact with ur database
 migrate = Migrate(app, db) #for any future changes
