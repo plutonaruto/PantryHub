@@ -65,7 +65,7 @@ def register_user():
 
 
 
-UPLOADED_FOLDER = 'uploads'
+UPLOADED_FOLDER = os.path.abspath(os.path.join(basedir, '..', 'uploads'))
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOADED_FOLDER'] = UPLOADED_FOLDER
 app.config['MAX_PHOTO_SIZE'] = 16 * 1024 * 1024
