@@ -3,3 +3,4 @@ firebase-admin-key.json
 __pycache__/
 *.pyc
 uploads/
+.vercel
