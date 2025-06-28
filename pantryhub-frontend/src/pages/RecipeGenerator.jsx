@@ -2,13 +2,13 @@ import { useState } from "react";
 import LayoutWrapper from "../components/layout/LayoutWrapper";
 import HeroBanner from "../components/layout/HeroBanner";
 import RecipeCard from "../components/cards/RecipeCard";
-import { useRecipe } from "../hooks/useRecipe";
+import { useRecipe } from "../context/RecipeContext";
 
 export default function RecipeGenerator() {
-  const { savedRecipes, setSavedRecipes } = useRecipe();
   const [ingredientInput, setIngredientInput] = useState("");
   const [generatedRecipes, setGeneratedRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { savedRecipes, setSavedRecipes } = useRecipe();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,12 +37,12 @@ export default function RecipeGenerator() {
   };
 
   const handleSave = (recipe) => {
-    // Avoid duplicates
-    if (savedRecipes.some((r) => r.name === recipe.name)) {
-      alert("Recipe already saved!");
-      return;
+    const alreadySaved = savedRecipes.some((r) => r.name === recipe.name);
+    if (alreadySaved) {
+      setSavedRecipes((prev) => prev.filter((r) => r.name !== recipe.name));
+    } else {
+      setSavedRecipes((prev) => [...prev, recipe]);
     }
-    setSavedRecipes((prev) => [...prev, recipe]);
   };
 
   return (
@@ -78,14 +78,36 @@ export default function RecipeGenerator() {
           <section>
             <h2 className="text-xl font-semibold mb-4">Generated Recipes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-              {generatedRecipes.map((recipe, index) => (
-                <RecipeCard
-                  key={index}
-                  recipe={recipe}
-                  onView={() => console.log(`Viewing ${recipe.name}`)}
-                  onSave={() => handleSave(recipe)}
-                />
-              ))}
+              {generatedRecipes.map((recipe, index) => {
+                const isSaved = savedRecipes.some((r) => r.name === recipe.name);
+                return (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg shadow p-4 flex flex-col justify-between"
+                  >
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">{recipe.name}</h3>
+                      <ul className="list-disc list-inside mb-4">
+                        {recipe.ingredients.map((ing, i) => (
+                          <li key={i}>{ing}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        className={`flex-1 px-4 py-2 rounded ${
+                          isSaved
+                            ? "bg-primary-dark hover:bg-red-400 text-white"
+                            : "bg-primary text-white hover:bg-primary-dark"
+                        }`}
+                        onClick={() => handleSave(recipe)}
+                      >
+                        {isSaved ? "Unsave" : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
