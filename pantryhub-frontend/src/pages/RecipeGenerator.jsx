@@ -2,8 +2,10 @@ import { useState } from "react";
 import LayoutWrapper from "../components/layout/LayoutWrapper";
 import HeroBanner from "../components/layout/HeroBanner";
 import RecipeCard from "../components/cards/RecipeCard";
+import { useRecipe } from "../hooks/useRecipe";
 
 export default function RecipeGenerator() {
+  const { savedRecipes, setSavedRecipes } = useRecipe();
   const [ingredientInput, setIngredientInput] = useState("");
   const [generatedRecipes, setGeneratedRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,22 +14,35 @@ export default function RecipeGenerator() {
     e.preventDefault();
     setLoading(true);
 
-    // For now, simulate generation
     const ingredients = ingredientInput
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const dummyRecipes = Array.from({ length: 5 }, (_, i) => ({
-      name: `Generated Recipe ${i + 1}`,
-      ingredients,
-    }));
+    const response = await fetch("http://localhost:5000/api/generate-recipes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ingredients }),
+    });
 
-    // Simulate delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const data = await response.json();
+    if (data.recipes && Array.isArray(data.recipes)) {
+      setGeneratedRecipes(data.recipes);
+    } else {
+      console.error("Invalid recipes response:", data);
+      setGeneratedRecipes([]);
+    }
 
-    setGeneratedRecipes(dummyRecipes);
     setLoading(false);
+  };
+
+  const handleSave = (recipe) => {
+    // Avoid duplicates
+    if (savedRecipes.some((r) => r.name === recipe.name)) {
+      alert("Recipe already saved!");
+      return;
+    }
+    setSavedRecipes((prev) => [...prev, recipe]);
   };
 
   return (
@@ -59,7 +74,7 @@ export default function RecipeGenerator() {
         </section>
 
         {/* Generated Recipes */}
-        {generatedRecipes.length > 0 && (
+        {Array.isArray(generatedRecipes) && generatedRecipes.length > 0 && (
           <section>
             <h2 className="text-xl font-semibold mb-4">Generated Recipes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -68,6 +83,7 @@ export default function RecipeGenerator() {
                   key={index}
                   recipe={recipe}
                   onView={() => console.log(`Viewing ${recipe.name}`)}
+                  onSave={() => handleSave(recipe)}
                 />
               ))}
             </div>

@@ -1,28 +1,26 @@
+import { useState, useEffect } from "react";
+
 export function useRecipe() {
-  const savedRecipes = [
-    {
-      name: 'Vanilla Cake',
-      servings: 3,
-      image: null,
-    },
-    {
-      name: 'Chocolate Cake',
-      servings: 2,
-      image: null,
-    },
-  ];
+  const [savedRecipes, setSavedRecipes] = useState(() => {
+    const saved = localStorage.getItem("savedRecipes");
+    return saved ? JSON.parse(saved) : [];
+  });
 
+  useEffect(() => {
+    localStorage.setItem("savedRecipes", JSON.stringify(savedRecipes));
+  }, [savedRecipes]);
+
+  // dummy ingredients for now
   const availableIngredients = [
-    { name: 'Flour', quantity: 1, image: '/images/flour.png' },
-    { name: 'Eggs', quantity: 4, image: '/images/eggs.png' },
-    { name: 'Sugar', quantity: 2, image: '/images/sugar.png' },
-    { name: 'Butter', quantity: 1, image: '/images/butter.png' },
+    { name: "Flour", quantity: 1, image: "/images/flour.png" },
+    { name: "Eggs", quantity: 4, image: "/images/eggs.png" },
+    { name: "Sugar", quantity: 2, image: "/images/sugar.png" },
+    { name: "Butter", quantity: 1, image: "/images/butter.png" },
   ];
 
-  const generateRecipes = () => {
-    // TODO: Call AI API in the future
-    console.log('Generate clicked. Integrate AI here.');
+  return {
+    savedRecipes,
+    setSavedRecipes,
+    availableIngredients,
   };
-
-  return { savedRecipes, availableIngredients, generateRecipes };
 }
