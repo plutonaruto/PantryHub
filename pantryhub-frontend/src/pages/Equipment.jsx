@@ -82,7 +82,7 @@ export default function Equipment() {
                     </div>
     )}
               { filteredItems.length === 0 ? (
-                <div className="bg-white px-12 py-8 rounded-lg shadow text-center">
+                <div className="bg-white p-8 rounded-lg shadow text-center">
                   <CookingPot size={48} className="mx-auto text-gray-300 mb-4" />
                   <h3 className="text-xl font-medium text-gray-700 mb-2">No items found</h3>
                   <p className="text-gray-500">

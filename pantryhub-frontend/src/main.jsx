@@ -4,12 +4,15 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './router.jsx';
 import './index.css';
 import { AuthProvider } from "./firebase/AuthProvider";
+//import { MarketplaceFormProvider } from "./components/forms/MarketplaceFormContext";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      {/*<MarketplaceFormProvider> */}
+        <RouterProvider router={router} />
     </AuthProvider>
+  
   </React.StrictMode>,
 );
 

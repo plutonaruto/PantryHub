@@ -116,5 +116,5 @@ export function useMarketplace() {
 
 
 
-  return { items, formData, addItem, updateForm, claimItem, onImageChange, fetchItems, getRecentItems };
+  return { items, formData, setFormData, addItem, updateForm, claimItem, onImageChange, fetchItems, getRecentItems };
 }

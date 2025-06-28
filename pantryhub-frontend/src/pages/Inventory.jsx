@@ -51,7 +51,6 @@ export default function Inventory() {
         items = {items}
         onSearchChange={handleSearchChange}
         searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
         onPostItem={() => setIsFormVisible(true)} />
       
 
