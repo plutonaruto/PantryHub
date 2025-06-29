@@ -36,6 +36,9 @@ export function useInventory() {
     formDataToSend.append('room_no', "101");  // dummy data for room_no
     formDataToSend.append('owner_id', ownerId);     // dummy data for owner_id
     formDataToSend.append('pantry_id', 1);    // dummy data for pantry_id
+    if (formData.image) {
+      formDataToSend.append('image', formData.image);
+    }
   
     try {
       await api.createItem(formDataToSend);

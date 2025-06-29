@@ -36,6 +36,8 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_cred
 def verify_token():
     if request.method == "OPTIONS":
         return None
+    if request.path.startswith('/uploads/'):
+        return None
     if request.path in ['/register']:
         return None
     auth_header = request.headers.get('Authorization', '')
@@ -95,7 +97,6 @@ def allowed_file(filename):
 
 #expose uploads/ as static route
 @app.route('/uploads/<filename>')
-@login_required
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOADED_FOLDER'], filename)
 
@@ -233,7 +234,7 @@ def edit(item_id):
 
     if image:
         filename = secure_filename(image.filename)
-        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        image.save(os.path.join(app.config['UPLOADED_FOLDER'], filename))
         item.image_url = f"/uploads/{filename}"
 
     if expiry_date:

@@ -15,33 +15,25 @@ export default function InventoryView({items = [], onSearchChange = () => {}, on
 
   const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-{/*
-  const onAdjustQty = (index, delta) => {
-    const newItems = [...updatedItems];
-    const newQuantity = Math.max(1, newItems[index].quantity + delta);
-    newItems[index].quantity = newQuantity;
-    setUpdatedItems(newItems);
-  };
-*/}
-const { user } = useAuth() || {};
+  const { user } = useAuth() || {};
 
-if (!user) return null;
+  if (!user) return null;
 
   
 
-useEffect(() => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+  useEffect(() => {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
 
-    const expiring = items.filter(item => {
-      const expiryDate = new Date(item.expiry_date);
-      return (
-        expiryDate.getDate() === tomorrow.getDate() &&
-        expiryDate.getMonth() === tomorrow.getMonth() &&
-        expiryDate.getFullYear() === tomorrow.getFullYear()
-      );
-    });
+      const expiring = items.filter(item => {
+        const expiryDate = new Date(item.expiry_date);
+        return (
+          expiryDate.getDate() === tomorrow.getDate() &&
+          expiryDate.getMonth() === tomorrow.getMonth() &&
+          expiryDate.getFullYear() === tomorrow.getFullYear()
+        );
+      });
 
     setExpiringItems(expiring);
   }, [items]);
@@ -89,8 +81,8 @@ useEffect(() => {
                 <ItemCard
                 key={i}
                 item={item}
-                onIncrement={() => adjustQty(i, 1)}
-                onDecrement={() => adjustQty(i, -1)}
+                onIncrement={() => onAdjustQty(i, 1)}
+                onDecrement={() => onAdjustQty(i, -1)}
                 isAdmin= {user.role === 'admin'}
                 />
                 ))}

@@ -58,7 +58,7 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
       <TextInput
         label="Item Name"
         name="name"
-        value={formData.name}
+        value={formData.name ?? ''}
         onChange={handleFormChange}
         required
         className="mb-4"
@@ -70,7 +70,7 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
         </label>
         <textarea
           name="description"
-          value={formData.description}
+          value={formData.description ?? ''}
           onChange={handleFormChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           rows={3}
@@ -81,7 +81,7 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
         label="Expiry Date"
         name="expiry_date"
         type="date"
-        value={formData.expiry_date}
+        value={formData.expiry_date ?? ''}
         onChange={handleFormChange}
         required
         className="mb-4"
@@ -92,7 +92,7 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
           Quantity
         </label>
         <QuantityControl
-          value={localQuantity}
+          value={localQuantity || 1}
           onChange={setLocalQuantity}
         />
         {warning && (
@@ -105,7 +105,7 @@ export default function MarketplaceForm({ formData, onChange, onSubmit, onImageC
       </label>
       <select
         name="pickup_location"
-        value={formData.pickup_location}
+        value={formData.pickup_location ?? ''}
         onChange={onChange}
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
         required

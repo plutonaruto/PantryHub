@@ -51,6 +51,7 @@ export default function Inventory() {
         items = {items}
         onSearchChange={handleSearchChange}
         searchQuery={searchQuery}
+        onAdjustQty={adjustQty}
         onPostItem={() => setIsFormVisible(true)} />
       
 

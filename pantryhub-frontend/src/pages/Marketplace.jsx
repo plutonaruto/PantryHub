@@ -24,15 +24,20 @@ const Marketplace = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const recentItems = getRecentItems();
+  const location = useLocation();
 
-  useEffect(() => {
-    if (location.state && location.state.prefill) {
+   useEffect(() => {
+    // Only autofill and open form if prefill exists in location.state
+    if (location.state?.prefill) {
       setFormData(location.state.prefill);
       setIsFormVisible(true);
-      window.history.replaceState({}, document.title); // clear state so it doesnt re-open on refresh
     }
   }, [location.state]);
 
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
 
   const handleSearchChange = (e) => {
@@ -86,7 +91,7 @@ const Marketplace = () => {
 
           <MarketplaceForm
             formData={formData}
-            onChange={setFormData}
+            onChange={handleFormChange}
             onSubmit={handleSubmit}
             onImageChange={onImageChange}
             onSuccess={() => setIsFormVisible(false)}

@@ -1,6 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { api } from "../api";
 
 export default function MarketplaceItemPage() {
   const { id } = useParams();
@@ -25,7 +26,17 @@ export default function MarketplaceItemPage() {
       <p>Quantity Available: {item.quantity}</p>
       <button className="mt-4 bg-primary text-white px-4 py-2 rounded">Claim Now</button>
       {user.role === 'admin' & (
-        <button className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+        <button className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+        onClick = { async() => {
+          try {
+            await api.removeMarketplaceItem(itemId);
+            alert("Marketplace Item removed successfully");
+            navigate("/marketplace");
+          } catch (error) {
+              console.error("Error removing Marketplace Item:", error);
+              alert("Failed to remove Marketplace Item. Please try again.");
+            }
+          }}>
         Remove Item 
         </button>
       )}
