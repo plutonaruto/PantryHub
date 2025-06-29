@@ -7,3 +7,4 @@ pantry-frontend/dist/
 'pantryhub- backend'/.env
 'pantryhub- backend'/config.py
 'pantryhub- backend'/firebase-admin-key.json
+node_modules
