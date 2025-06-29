@@ -3,16 +3,26 @@ import Home from "./pages/Home";
 import Inventory from "./pages/Inventory";
 import Marketplace from "./pages/Marketplace";
 import MarketplaceItemPage from "./pages/MarketplaceItemPage";
-import Recipe from "./pages/Recipe";
+import Recipe from "./pages/pages/Recipe";
 import RecipeGenerator from "./pages/RecipeGenerator";
+import Profile from "./pages/Profile";
+import ProtectedRoute from './ProtectedRoute';
+import Login from "./pages/Login";
+import ItemPage from './pages/ItemPage';
+import Equipment from "./pages/Equipment";
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
-  { path: "/inventory", element: <Inventory /> },
-  { path: "/marketplace", element: <Marketplace /> },
-  { path: "/marketplace/:id", element: <MarketplaceItemPage /> },
-  { path: "/recipes", element: <Recipe /> },
-  { path: "/recipes/generate", element: <RecipeGenerator /> },
-  { path: "*", element: <Home /> }, // fallback
+  { path: "/", element: <ProtectedRoute> <Home /> </ProtectedRoute>} ,
+  { path: "/inventory", element: <ProtectedRoute> <Inventory /> </ProtectedRoute> },
+  { path: "/marketplace", element: <ProtectedRoute> <Marketplace /> </ProtectedRoute> },
+  { path: "/marketplace/:id", element: <ProtectedRoute> <MarketplaceItemPage /> </ProtectedRoute>},
+  { path: "/items/:id", element: <ProtectedRoute> <ItemPage /> </ProtectedRoute>},
+  { path: "/recipes", element: <ProtectedRoute> <Recipe /> </ProtectedRoute>},
+  { path: "/recipes/generate", element: <ProtectedRoute> <RecipeGenerator /> </ProtectedRoute>},
+  { path: "*", element: <ProtectedRoute> <Home /> </ProtectedRoute>}, // fallback
+  { path: "/register", element: <FirebaseAuthPage /> },
+  { path:"/login", element: <Login /> },
+  { path: "/profile", element: <ProtectedRoute> <Profile /> </ProtectedRoute>},
+  { path: "/equipment", element: <ProtectedRoute> <Equipment /> </ProtectedRoute> }
 ]);
 

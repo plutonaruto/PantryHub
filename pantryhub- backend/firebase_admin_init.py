@@ -1,11 +1,25 @@
 import os
+os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
+
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, auth
 
 
 #cred = credentials.Certificate("/serviceAccountKey.json")
 #firebase_admin.initialize_app(cred)
 
 
-os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-default_app = firebase_admin.initialize_app() 
+
+default_app = firebase_admin.initialize_app(options={"projectId": "pantryhub-login-and-flow"})
+
+# manually set admins 
+uid = "6ewAHhltktiCj0bXRbuJWxw24q2t"
+
+try:
+    user = auth.get_user(uid)
+    print("user found:", user.uid)
+
+    auth.set_custom_user_claims(uid, {"role": "admin"})
+    print(f"uid {uid} set as admin")
+except auth.UserNotFoundError:
+    print(f"user {uid} not found in the emulator")

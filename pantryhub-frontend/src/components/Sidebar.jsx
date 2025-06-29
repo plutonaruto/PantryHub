@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import logo from "../assets/logo.png";
 import React from 'react';
 
 
@@ -16,6 +16,8 @@ export default function Sidebar() {
                 <Link to="/" className="nav-link">Home</Link>
                 <Link to="/inventory" className="nav-link">Inventory</Link>
                 <Link to="/marketplace" className="nav-link">Marketplace</Link>
+                <Link to="/equipment" className="nav-link">Equipment</Link>
+                <Link to="/profile" className="nav-link">Profile</Link>
 
             </nav>
            </div>

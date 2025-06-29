@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 alembic==1.16.1
 blinker==1.9.0
 click==8.2.1
@@ -15,3 +16,13 @@ flask-cors
 python-dotenv
 psycopg2-binary
 firebase-admin==6.5.0
+=======
+firebase-admin
+flask
+flask-cors
+flask-sqlalchemy
+flask-migrate
+python-dotenv
+pyjwt
+psycopg2-binary
+>>>>>>> auth-integration

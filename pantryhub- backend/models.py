@@ -17,7 +17,7 @@ class Item(Base):
     name = Column(String(150), nullable=False)
     quantity = Column(Integer, nullable=False, default=1)
     room_no = Column(String(50), nullable=False )
-    owner_id = Column(Integer,  nullable=False)
+    owner_id = Column(String(64),  nullable=False)
     pantry_id = Column(Integer, nullable=False)
     expiry_date = Column(Date, nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)

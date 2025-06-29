@@ -8,7 +8,10 @@ import random
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 import firebase_admin
-from flask import Flask, request, jsonify
+from firebase_admin import credentials, auth, app_check
+import flask
+import jwt
+from flask import Flask, request, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from datetime import datetime
@@ -20,9 +23,17 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.sql import func
 from flask_migrate import Migrate
 from flask import send_from_directory
-from firebase_admin import credentials, auth
+from auth.auth_helper import login_required
+
+
+os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
+firebase_app = firebase_admin.initialize_app(options={
+    "projectId": "pantryhub-login-and-flow"
+}) 
 
 load_dotenv()
+
+os.environ["GOOGLE_CLOUD_PROJECT"] = "pantryhub-login-and-flow"
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -197,34 +208,45 @@ if not firebase_admin._apps:
 
 @app.route('/verify', methods = ['POST'])
 def verify_token():
-    id_token = request.json.get("id_token")
-
-    if not id_token:
-        return jsonify({"error": "ID Token is missing"}), 400
-    
+    if request.method == "OPTIONS":
+        return None
+    if request.path in ['/register']:
+        return None
+    auth_header = request.headers.get('Authorization', '')
+    print("Authorization header:", auth_header)
+    if not auth_header.startswith('Bearer '):
+        return jsonify({"error": "Token is missing"}), 401
+    token = auth_header.split('Bearer ')[1]
     try:
-        decoded_token = auth.verify_id_token(id_token)
-        user_id = decoded_token['uid']
-        return jsonify({"message": "Token is valid", "user_id": user_id}), 200
+        decoded_token = auth.verify_id_token(token)
+        request.user_id = decoded_token['uid']
+
+        g.current_user = {
+            "uid": decoded_token['uid'],
+            "email": decoded_token.get('email'),
+            "role": decoded_token.get('role', 'user')  # default to 'user' if not present
+        }
+    except Exception as e:
+        print("Token verification failed:", str(e))
+        return jsonify({"error": "Invalid token"}), 401  # Unauthorized if token is 
     
-    except auth.InvalidIdTokenError:
-        return jsonify({"error": "Invalid token"}), 401
+    print("Authorization header:", request.headers.get('Authorization'))
 
 @app.route('/register', methods=['POST'])
 def register_user():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    name = data.get('name')
     try:
         user = auth.create_user(
             email=email,
             password=password,
+            name=name
         )
         return jsonify({"message": f"User {user.uid} created successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    
-
 
 
 UPLOADED_FOLDER = os.path.abspath(os.path.join(basedir, '..', 'uploads'))
@@ -256,11 +278,11 @@ def uploaded_file(filename):
 
 # Inventory table
 class Item(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True) #item id
     name = db.Column(db.String(150), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     room_no = db.Column(db.String(50), nullable=False)
-    owner_id = db.Column(db.Integer, nullable=False)
+    owner_id = db.Column(db.String, nullable=False) # user/owner id
     pantry_id = db.Column(db.Integer, nullable=False)
     expiry_date = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -275,7 +297,7 @@ class MarketplaceItem(db.Model):
     name = db.Column(db.String(150), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     room_no = db.Column(db.String(50), nullable=False)
-    owner_id = db.Column(db.Integer, nullable=False)
+    owner_id = db.Column(db.String, nullable=False)
     pantry_id = db.Column(db.Integer, nullable=False)
     expiry_date = db.Column(db.Date, nullable=True)
     image_url = db.Column(db.String, nullable=True)
@@ -287,6 +309,17 @@ class MarketplaceItem(db.Model):
 
     def __repr__(self): # for debugging
         return f'<MarketplaceItem {self.id}>'
+    
+# Equipment table 
+class Equipment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    label = db.Column(db.String(150), nullable=False)
+    pantry_id = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    usage_instructions = db.Column(db.Text, nullable=True)
+
+    def __repr__(self): # for debugging
+        return f'<Equipment {self.id}>'
 
 with app.app_context():
     db.create_all()
@@ -297,6 +330,8 @@ with app.app_context():
 #create new post
 
 @app.route('/items', methods=['POST'])
+@login_required
+#@check_role("create")
 def create():
     data = request.form.to_dict()
     print("Received FORM:", data)
@@ -335,9 +370,11 @@ def create():
     except Exception as e:
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
-@app.route('/items/<string:item_name>', methods=['GET'])
-def get(item_name):
-    item = Item.query.get(item_name)
+
+@app.route('/items/<int:item_id>', methods=['GET'])
+@login_required
+def get(item_id):
+    item = Item.query.get(item_id)
     if not item:
         return jsonify({"error": "Item not found"}), 404
 
@@ -352,8 +389,47 @@ def get(item_name):
         "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None
     })
 
+@app.route('/items/<int:item_id>', methods=['PATCH'])
+@login_required
+def edit(item_id):
+    item = Item.query.get(item_id)
+    if not item:
+        return jsonify({"error": f"Item not found"}), 404
+
+    name = request.form.get('name')
+    description = request.form.get('description')
+    expiry_date = request.form.get('expiry_date')
+    quantity = request.form.get('quantity')
+    image = request.files.get('image')
+
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    if name:
+        item.name = name
+    if quantity:
+        item.quantity = quantity
+
+    if image:
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        item.image_url = f"/uploads/{filename}"
+
+    if expiry_date:
+        item.expiry_date = expiry_date
+
+    if item.quantity == 0:
+        db.session.delete(item)
+
+    db.session.commit()
+    
+    return jsonify({"message": f"Item {item.id} updated"}, 200)
+
+
 #delete an item
 @app.route('/items/<int:item_id>', methods=['DELETE'])
+@login_required
+#@check_role("delete")
 def delete(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -366,6 +442,7 @@ def delete(item_id):
 
 #update qty of item
 @app.route('/items/<int:item_id>', methods=['PUT'])
+@login_required
 def update_quantity(item_id):
     item = Item.query.get(item_id)
     if not item:
@@ -383,9 +460,35 @@ def update_quantity(item_id):
     return jsonify({"message": "Quantity updated", "quantity": item.quantity}), 200
 
 
-#fetch all items
+#fetch all items for user 
+@app.route('/items/<string:owner_id>', methods=['GET'])
+@login_required
+#@check_role("view_own_items")
+def get_all_items(owner_id):
+    try:
+        print("Fetching items for owner_id:", owner_id) #debug
+        items = Item.query.filter_by(owner_id= owner_id).all()
+        result = []
+        for item in items:
+            result.append({
+                "id": item.id,
+                "name": item.name,
+                "quantity": item.quantity,
+                "image_url": item.image_url,
+                "room_no": item.room_no,
+                "owner_id": item.owner_id,
+                "pantry_id": item.pantry_id,
+                "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        print("Error in GET /items/<owner_id>:", str(e))
+        return jsonify({"error": "Internal Server Error"}), 500
+
+#fetch all items for admin
 @app.route('/items', methods=['GET'])
-def get_all_items():
+@login_required
+def get_all_items_admin():
     items = Item.query.all()
     result = []
     for item in items:
@@ -435,7 +538,7 @@ def create_marketitem():
             name=data['name'],
             quantity=int(data.get('quantity', 1)),
             room_no=data['room_no'],
-            owner_id=int(data['owner_id']),
+            owner_id=data['owner_id'],
             pantry_id=int(data['pantry_id']),
             image_url = image_path, 
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
@@ -558,6 +661,54 @@ def get_marketplace_items():
         })
     return jsonify(result), 200
 
+# ----------------------
+# Equipment Endpoints
+# ----------------------
+
+@app.route('/equipment', methods=['POST'])
+@login_required
+def create_equipment():
+    role = g.current_user.get('role') # check if it is admin
+    if role != 'admin':
+        return jsonify({"error": "Unauthorized. Admin access required"}), 403
+    
+    data = request.form.to_dict()
+    print("Received FORM:", data)
+    required_fields = ['label', 'pantry_id']
+
+    if not all(data.get(field) for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        equipment = Equipment(
+            label=data['label'],
+            pantry_id=data['pantry_id'],
+            description=data.get('description', ''),
+            usage_instructions=data.get('usage_instructions', '')
+        )
+        db.session.add(equipment)
+        db.session.commit()
+        return jsonify({"message": "Equipment created successfully", "id": equipment.id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Error creating equipment: {str(e)}"}), 400
+    
+
+   
+@app.route('/equipment', methods=['GET'])
+@login_required
+def get_all_equipment():
+    equipments = Equipment.query.all()
+    result = []
+    for equipment in equipments :
+        result.append({
+            "id": equipment.id,
+            "label": equipment.label,
+            "pantry_id": equipment.pantry_id,
+            "description": equipment.description,
+            "usage_instructions": equipment.usage_instructions
+
+        })
+    return jsonify(result), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

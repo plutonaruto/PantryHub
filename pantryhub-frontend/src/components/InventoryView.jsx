@@ -4,27 +4,32 @@ import ItemCard from './cards/ItemCard';
 import { useState, useEffect } from 'react';
 import cart from '../assets/cart.png';
 import Topbar from '../components/layout/Topbar';
+import { ShoppingCart } from 'lucide-react';
+import { useAuth } from "../firebase/AuthProvider";
 
 
-export default function InventoryView({name, items = [] }) {
-    const [updatedItems, setUpdatedItems] = useState(items);
-    const [expiringItems, setExpiringItems] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isFormVisible, setIsFormVisible] = useState(false);
 
-  const handleSearchChange = (e) => { setSearchQuery(e.target.value); };
+export default function InventoryView({items = [], onSearchChange = () => {}, onPostItem = () => {}, onAdjustQty = () => {}, searchQuery = ""}) {
+
+  const [expiringItems, setExpiringItems] = useState([]);
+
   const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-
+{/*
   const onAdjustQty = (index, delta) => {
     const newItems = [...updatedItems];
     const newQuantity = Math.max(1, newItems[index].quantity + delta);
     newItems[index].quantity = newQuantity;
     setUpdatedItems(newItems);
   };
+*/}
+const { user } = useAuth() || {};
 
-  useEffect(() => {
+if (!user) return null;
+
+  
+
+useEffect(() => {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -38,26 +43,26 @@ export default function InventoryView({name, items = [] }) {
       );
     });
 
-
     setExpiringItems(expiring);
-    }, []);
+  }, [items]);
 
-    useEffect(() => {
-        setUpdatedItems(items); 
-    }, []);
+    //useEffect(() => {
+       // setUpdatedItems(items); 
+ //   }, []);
 
   return (
     <div className="flex flex-col gap-4"> {/* Unified vertical spacing */}
       {/* Hero Section */}
       <div className="hero-banner flex flex-col justify-between text-white mb-4">
-        <h1 className="text-3xl font-bold mb-2">Welcome Back, {name}!</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome Back, {user.name}!</h1>
         <p className="text-white text-opacity-90">What would you like to do today?</p>
       </div>
 
       <div className = "flex flex-col mb-6 mt-6">
         <Topbar
         searchQuery={searchQuery}
-         onSearchChange={handleSearchChange}/>
+        onSearchChange={onSearchChange}
+        onPostItem = {onPostItem}/>
       </div>
 
       {/* Content Section */}
@@ -67,18 +72,33 @@ export default function InventoryView({name, items = [] }) {
           <h2 className="text-lg font-bold text-black flex items-center mb-4">
             Your Inventory <FaChevronRight className="ml-1" />
           </h2>
-          <div className="grid grid-cols-3 gap-4">
-            {items.map((item, i) => (
-              <Link to={`/item/${item.id}`} key={item.id}>
+
+          {filteredItems.length === 0 ? (
+            <div className="bg-white p-8 rounded-lg shadow text-center">
+              <ShoppingCart size={48} className="mx-auto text-gray-300 mb-4" />
+              <h3 className="text-xl font-medium text-gray-700 mb-2">No items found</h3>
+              <p className="text-gray-500">
+                {searchQuery 
+                  ? `No items match your search for "${searchQuery}"`
+                  : "Your inventory empty. Start adding items!"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              {filteredItems.map((item, i) => (
                 <ItemCard
-                  item={item}
-                  onIncrement={() => onAdjustQty(i, 1)}
-                  onDecrement={() => onAdjustQty(i, -1)}
+                key={i}
+                item={item}
+                onIncrement={() => adjustQty(i, 1)}
+                onDecrement={() => adjustQty(i, -1)}
+                isAdmin= {user.role === 'admin'}
                 />
-              </Link>
-            ))}
-          </div>
+                ))}
+            </div>
+          )} 
+
         </div>
+        
 
         {/* Right Column */}
         <div className="w-[300px] flex flex-col gap-4 mx-4">
@@ -98,8 +118,8 @@ export default function InventoryView({name, items = [] }) {
           </div>
 
           {/* Marketplace Link */}
-          <div className="flex flex-col bg-[#9C6B98] container rounded-full text-center gap-2 items-center justify-center mt-6">
-            <img src={cart} alt="Cart" className="h-5 w-5 object-contain max-w-[60px]"></img>
+          <div className="flex flex-col bg-[#9C6B98] container rounded-xl text-center gap-2 items-center justify-center mt-6 p-3">
+            <img src={cart} alt="Cart" className="h-20 w-20 object-contain max-w-[60px]"></img>
             <Link to="/marketplace">
               <button className="text-white bg-white/20 px-4 py-2 rounded-full flex items-center justify-center gap-2">
                 Explore Marketplace <FaChevronRight />
