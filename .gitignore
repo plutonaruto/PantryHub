@@ -7,3 +7,5 @@ pantry-frontend/dist/
 'pantryhub- backend'/.env
 'pantryhub- backend'/firebase-admin-key.json
 .vercel
+
+firestore-debug.log
