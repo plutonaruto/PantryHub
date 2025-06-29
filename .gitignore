@@ -3,7 +3,10 @@ pantry-frontend/node_modules/
 pantry-frontend/.vite/
 pantry-frontend/dist/
 
+firestore-debug.log 
+
 # backend
 'pantryhub- backend'/.env
 'pantryhub- backend'/config.py
 'pantryhub- backend'/firebase-admin-key.json
+node_modules
