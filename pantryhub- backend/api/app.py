@@ -41,7 +41,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={
     r"/*": {
         "origins": ["http://localhost:5173", "http://localhost:3000"],
-        "methods": ["GET", "POST", "OPTIONS"],
+        "methods": ["GET", "POST", "OPTIONS", "PATCH"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
 })
@@ -75,7 +75,7 @@ def try_together_ai_with_retry(ingredients, max_retries=3, base_delay=1):
         if recipes:
             return recipes
         
-        # If not the last attempt, wait before retrying
+        #wait before retrying
         if attempt < max_retries - 1:
             delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
             print(f"Retrying in {delay:.2f} seconds...")
@@ -180,14 +180,14 @@ def test_apis():
     
     return jsonify(results)
 
-# Quick recipe generation endpoint (no AI, just templates)
+# Quick recipe generation endpoint (no AI)
 @app.route('/api/generate-recipes', methods=['POST', 'OPTIONS'])
 def generate_recipes_simple():
     """Generate recipes using templates only - always works"""
     if request.method == 'OPTIONS':
         return '', 200
         
-    data = request.get_json(force=True)  # force=True helps with content-type issues
+    data = request.get_json(force=True)  
     ingredients = data.get('ingredients', []) if data else []
     
     if not ingredients:
@@ -521,6 +521,8 @@ def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
 
+    print("===> request.form:", dict(request.form))
+    print("===> request.files:", request.files)
     #optional image handling
     image_path = None
     if file and allowed_file(file.filename):

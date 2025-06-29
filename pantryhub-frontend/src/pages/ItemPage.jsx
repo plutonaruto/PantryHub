@@ -92,8 +92,8 @@ export default function ItemPage() {
           }}>
             Remove
           </button>
-
-          {/* OFFER ON MARKETPLACE */}
+        </div>
+          {/* OFFER ON MARKETPLACE 
           <button className="mt-4 bg-white text-black px-4 py-2 rounded"
           onClick= { () => {
             navigate("/marketplace", {
@@ -108,7 +108,7 @@ export default function ItemPage() {
               },
             });
           }}>Offer on Marketplace</button>
-        </div>
+        </div> */}
 
         {/* EDIT FORM */}
         { isEditing && (

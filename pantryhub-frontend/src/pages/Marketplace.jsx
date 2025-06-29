@@ -5,13 +5,11 @@ import MarketplaceForm from '../components/forms/MarketplaceForm';
 import MarketplaceItemCard from '../components/cards/MarketplaceItemCard';
 import { useMarketplace } from '../hooks/useMarketplace';
 import { ShoppingCart, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useLocation } from "react-router-dom";
 
 const Marketplace = () => {
   const { 
     items, 
     formData, 
-    setFormData,
     addItem, 
     updateForm, 
     onImageChange,
@@ -25,23 +23,13 @@ const Marketplace = () => {
 
   const recentItems = getRecentItems();
 
-  useEffect(() => {
-    if (location.state && location.state.prefill) {
-      setFormData(location.state.prefill);
-      setIsFormVisible(true);
-      window.history.replaceState({}, document.title); // clear state so it doesnt re-open on refresh
-    }
-  }, [location.state]);
-
-
-
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const filteredItems = Array.isArray(items)
-  ? items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  : [];
+  const filteredItems = items.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +39,6 @@ const Marketplace = () => {
       const success = await addItem(); // no need to pass event
       if (success) {
         setIsFormVisible(false);
-        setFormData({});
         setSearchQuery('');
       }
     } catch (err) {
@@ -68,8 +55,7 @@ const Marketplace = () => {
       showTopbar={true}
       searchQuery={searchQuery}
       onSearchChange={handleSearchChange}
-      onPostItem={() => { setFormData({});
-      setIsFormVisible(true); } }
+      onPostItem={() => setIsFormVisible(true)}
     >
     {isFormVisible && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -86,7 +72,7 @@ const Marketplace = () => {
 
           <MarketplaceForm
             formData={formData}
-            onChange={setFormData}
+            onChange={updateForm}
             onSubmit={handleSubmit}
             onImageChange={onImageChange}
             onSuccess={() => setIsFormVisible(false)}

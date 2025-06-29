@@ -3,12 +3,13 @@ import Home from "./pages/Home";
 import Inventory from "./pages/Inventory";
 import Marketplace from "./pages/Marketplace";
 import MarketplaceItemPage from "./pages/MarketplaceItemPage";
-import Recipe from "./pages/pages/Recipe";
+import Recipe from "./pages/Recipe";
 import RecipeGenerator from "./pages/RecipeGenerator";
 import Profile from "./pages/Profile";
 import ProtectedRoute from './ProtectedRoute';
 import Login from "./pages/Login";
 import ItemPage from './pages/ItemPage';
+import FirebaseAuthPage from './pages/FirebaseAuthPage';
 import Equipment from "./pages/Equipment";
 
 export const router = createBrowserRouter([
