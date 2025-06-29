@@ -36,18 +36,16 @@ export function useInventory() {
     formDataToSend.append('room_no', "101");  // dummy data for room_no
     formDataToSend.append('owner_id', ownerId);     // dummy data for owner_id
     formDataToSend.append('pantry_id', 1);    // dummy data for pantry_id
-
-    
   
     try {
       await api.createItem(formDataToSend);
-    
-
       const data = await api.getUserItems(ownerId);
       setItems(data);
       setFormData({ name: '', expiry: '', quantity: 1, image: null });
+      return true;
     } catch (err) {
       console.error("Failed to post item to backend:", err);
+      return false;
     }
   };
 

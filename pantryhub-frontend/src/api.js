@@ -71,7 +71,8 @@ export const api = {
   getUserItems: (ownerId) => makeAuthenticatedRequest(`/items/${ownerId}`),
   fetchItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`),
   createItem: (itemData) => makeAuthenticatedRequest('/items', 'POST', itemData),
-  updateItem: (itemId, updates) => makeAuthenticatedRequest(`/items/${itemId}`, 'PUT', updates),
+  updateItem: (itemId, updates) => makeAuthenticatedRequest(`/items/${itemId}`, 'PATCH', updates),
+  updateItemQuantity: (itemId, quantity) => makeAuthenticatedRequest(`/items/${itemId}`, 'PUT', { quantity }),
   deleteItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`, 'DELETE'),
 
   // Marketplace endpoints
