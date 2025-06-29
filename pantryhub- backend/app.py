@@ -209,6 +209,42 @@ def get(item_id):
         "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None
     })
 
+@app.route('/items/<int:item_id>', methods=['PATCH'])
+@login_required
+def edit(item_id):
+    item = Item.query.get(item_id)
+    if not item:
+        return jsonify({"error": f"Item not found"}), 404
+
+    name = request.form.get('name')
+    description = request.form.get('description')
+    expiry_date = request.form.get('expiry_date')
+    quantity = request.form.get('quantity')
+    image = request.files.get('image')
+
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    if name:
+        item.name = name
+    if quantity:
+        item.quantity = quantity
+
+    if image:
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        item.image_url = f"/uploads/{filename}"
+
+    if expiry_date:
+        item.expiry_date = expiry_date
+
+    if item.quantity == 0:
+        db.session.delete(item)
+
+    db.session.commit()
+    
+    return jsonify({"message": f"Item {item.id} updated"}, 200)
+
 
 #delete an item
 @app.route('/items/<int:item_id>', methods=['DELETE'])
@@ -227,7 +263,6 @@ def delete(item_id):
 #update qty of item
 @app.route('/items/<int:item_id>', methods=['PUT'])
 @login_required
-#@check_role("edit")
 def update_quantity(item_id):
     item = Item.query.get(item_id)
     if not item:
