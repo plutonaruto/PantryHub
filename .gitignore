@@ -6,9 +6,9 @@ pantry-frontend/dist/
 firestore-debug.log 
 
 # backend
-'pantryhub- backend'/.env
+pantryhub-backend/.env
 .vercel
 firestore-debug.log
-'pantryhub- backend'/config.py
-'pantryhub- backend'/firebase-admin-key.json
+pantryhub-backend/config.py
+pantryhub-backend/firebase-admin-key.json
 node_modules
