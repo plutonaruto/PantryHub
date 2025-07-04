@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from base import Base
 from sqlalchemy import Column, Integer, String, DateTime 
-from models import Item, Notification 
+from models import Item
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from sqlalchemy.sql import func
@@ -54,6 +54,7 @@ CORS(app, supports_credentials=True, resources={
 @login_required
 def get_notifications(user_id):
     try:
+        print(f"Fetching notifications for {user_id}")
         notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.timestamp.desc()).all()
         return jsonify([
             {
@@ -66,20 +67,9 @@ def get_notifications(user_id):
             for n in notifications
         ]), 200
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": f"Error fetching notifications: {str(e)}"}), 500
-
-
-@app.route('/notifications/<int:notif_id>/mark-read', methods=['PATCH'])
-@login_required
-def mark_notification_read(notif_id):
-    notif = Notification.query.get(notif_id)
-    if not notif:
-        return jsonify({"error": "Notification not found"}), 404
-
-    notif.read = True
-    db.session.commit()
-    return jsonify({"status": "Notification marked as read"}), 200
-
 
 @app.route('/notifications', methods=['POST'])
 @login_required
@@ -379,6 +369,17 @@ class Equipment(db.Model):
 
     def __repr__(self): # for debugging
         return f'<Equipment {self.id}>'
+    
+
+# Notification table 
+class Notification(db.Model):
+    __tablename__ = "notifications"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, nullable=False)
+    type = db.Column(db.String, nullable=False)
+    message = db.Column(db.String, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    read = db.Column(db.Boolean, default=False)
 
 with app.app_context():
     db.create_all()
@@ -621,20 +622,19 @@ def create_marketitem():
         print("Exception while creating item:", str(e)) #debugging purposes
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
-#patch an item
 @app.route('/marketplace/<int:market_item_id>', methods=['PATCH'])
-# @login_required
-def patch(market_item_id):
+def update_marketplace_item(market_item_id):
     market_item = MarketplaceItem.query.get(market_item_id)
-    if not market_item:
-        return jsonify({"error": f"Item not found"}), 404
-
-    data = request.get_json()
-    print("PATCH DATA:", data)  # Debug
-
     if not market_item:
         return jsonify({"error": "Item not found"}), 404
 
+    data = request.get_json()
+    print("PATCH data:", data)
+
+    claimer_id = data.get('claimer_id')
+    claimed = data.get('claimed')
+
+    # Update fields
     if 'quantity' in data:
         if data['quantity'] is None:
             return jsonify({"error": "Quantity cannot be null"}), 400
@@ -644,12 +644,10 @@ def patch(market_item_id):
             return jsonify({"error": "Quantity must be a number"}), 400
 
     if 'claimed' in data:
-        market_item.claimed = bool(data['claimed'])
+        market_item.claimed = bool(claimed)
 
     if 'name' in data:
         market_item.name = data['name']
-    if 'quantity' in data:
-        market_item.quantity = int(data['quantity'])
     if 'room_no' in data:
         market_item.room_no = data['room_no']
     if 'owner_id' in data:
@@ -666,14 +664,39 @@ def patch(market_item_id):
         market_item.instructions = data['instructions']
     if 'pickup_location' in data:
         market_item.pickup_location = data['pickup_location']
-    if 'claimed' in data:
-        market_item.claimed = data['claimed']
+
+    # If quantity hits 0, delete item and return immediately
     if market_item.quantity == 0:
         db.session.delete(market_item)
+        db.session.commit()
+        return jsonify({"message": f"Item {market_item.id} deleted"}), 200
 
     db.session.commit()
-    
-    return jsonify({"message": f"Item {market_item.id} updated"}, 200)
+
+    # If just claimed, create notifications
+    if claimed and claimer_id:
+        claimer_notif = Notification(
+            user_id=claimer_id,
+            type="CLAIM_CONFIRMED",
+            message=f"You claimed '{market_item.name}'. Pickup instructions: {market_item.instructions}",
+            timestamp=datetime.utcnow(),
+            read=False
+        )
+        owner_notif = Notification(
+            user_id=market_item.owner_id,
+            type="ITEM_CLAIMED",
+            message=f"Your item '{market_item.name}' was claimed by another resident.",
+            timestamp=datetime.utcnow(),
+            read=False
+        )
+        db.session.add(claimer_notif)
+        db.session.add(owner_notif)
+        db.session.commit()
+
+    # Always return something
+    return jsonify({"message": f"Item {market_item.id} updated"}), 200
+
+
 
 # get an item
 @app.route('/marketplace/<int:item_id>', methods=['GET'])

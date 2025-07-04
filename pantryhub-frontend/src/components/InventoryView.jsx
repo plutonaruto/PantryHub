@@ -7,8 +7,6 @@ import Topbar from '../components/layout/Topbar';
 import { ShoppingCart } from 'lucide-react';
 import { useAuth } from "../firebase/AuthProvider";
 
-
-
 export default function InventoryView({items = [], onSearchChange = () => {}, onPostItem = () => {}, onAdjustQty = () => {}, searchQuery = ""}) {
 
   const [expiringItems, setExpiringItems] = useState([]);

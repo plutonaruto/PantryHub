@@ -1,32 +1,53 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { auth } from "../firebase/firebase";
+import { useAuth } from "../firebase/AuthProvider"
 import NotificationItem from "../components/cards/NotificationItem";
 
-export default function Notifications({ userId }) {
+export default function Notifications() {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await axios.get(`/notifications/${userId}`);
-        // Make sure it's always an array:
-        if (Array.isArray(res.data)) {
-          setNotifications(res.data);
-        } else {
-          setNotifications([]);
-          console.error("Unexpected response:", res.data);
+ useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+        const currentUser = auth.currentUser;
+
+        if (!currentUser) {
+        setError("User not logged in.");
+        setLoading(false);
+        return;
         }
-      } catch (err) {
+
+        const token = await currentUser.getIdToken();
+
+        const res = await axios.get(
+        `http://localhost:3000/notifications/${currentUser.uid}`,
+        {
+            headers: {
+            Authorization: `Bearer ${token}`
+            }
+        }
+        );
+
+        if (Array.isArray(res.data)) {
+        setNotifications(res.data);
+        } else {
+        setNotifications([]);
+        console.error("Unexpected response:", res.data);
+        }
+    } catch (err) {
         console.error("Error fetching notifications:", err);
         setError("Failed to load notifications.");
-      } finally {
+    } finally {
         setLoading(false);
-      }
-    };
+    }
+  };
+
     fetchNotifications();
-  }, [userId]);
+  }, [user]);
 
   if (loading) return <div>Loading notifications...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

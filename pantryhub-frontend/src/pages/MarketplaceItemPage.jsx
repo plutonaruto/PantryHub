@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import QuantityClaim from '../components/shared/QuantityClaim';
+import { useAuth } from "../firebase/AuthProvider";
 
 export default function MarketplaceItemPage() {
   const { id } = useParams();
   const [item, setItem] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     axios.get(`http://localhost:3000/marketplace/${id}`)
@@ -18,15 +20,19 @@ export default function MarketplaceItemPage() {
     if (!item || qty > item.quantity) return;
 
     try {
+
+      const remainingQty = item.quantity - qty;
+
       await axios.patch(`http://localhost:3000/marketplace/${id}`, {
         quantity: item.quantity - qty,
-        claimed: item.quantity - qty === 0,
+        claimer_id: user.uid,
+        claimed: remainingQty <= 0
       });
 
       setItem(prev => ({
         ...prev,
-        quantity: prev.quantity - qty,
-        claimed: prev.quantity - qty === 0,
+        quantity: remainingQty,
+        claimed: remainingQty <= 0
       }));
     } catch (err) {
       console.error('Error claiming item:', err);

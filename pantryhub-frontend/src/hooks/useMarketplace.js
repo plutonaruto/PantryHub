@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from "../firebase/AuthProvider";
 
 export function useMarketplace() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '', expiry_date: '' , quantity: 1, image: null, instructions: '', pickup_location: ''});
+  const { user } = useAuth();
 
   const fetchItems = async () => {
     try {
@@ -82,24 +84,26 @@ export function useMarketplace() {
     const remainingQty = Number(item.quantity) - quantityToClaim;
 
     try {
-      if (remainingQty <= 0) {
-        await axios.patch(`http://localhost:3000/marketplace/${item.id}`, {
-          quantity: 0,
-          claimed: true
-        });
-        const updated = [...items];
-        updated.splice(index, 1);
-        setItems(updated);
-      } else {
-        await axios.patch(`http://localhost:3000/marketplace/${item.id}`, {
-          quantity: remainingQty
-        });
-        const updated = [...items];
-        updated[index].quantity = remainingQty;
-        setItems(updated);
-      }
+      await axios.patch(`http://localhost:3000/marketplace/${item.id}`, {
+        quantity: remainingQty < 0 ? 0 : remainingQty,
+        claimer_id: user.uid,
+        claimed: remainingQty <= 0
+      });
 
-      return { success: true, instructions: item.instructions, claimedQty: quantityToClaim };
+      const updated = [...items];
+
+      if (remainingQty <= 0) {
+        updated.splice(index, 1);
+      } else {
+        updated[index].quantity = remainingQty;
+      }
+      setItems(updated);
+
+      return {
+        success: true,
+        instructions: item.instructions,
+        claimedQty: quantityToClaim
+      };
 
     } catch (err) {
       console.error("Failed to update item:", err.response?.data || err.message);
