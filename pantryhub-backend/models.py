@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, String, DateTime, Date, ForeignKey,
-    CheckConstraint
+    CheckConstraint, func, Boolean
 )
 from sqlalchemy.orm import relationship, validates
 from datetime import datetime
@@ -22,3 +22,12 @@ class Item(Base):
     expiry_date = Column(Date, nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)
  
+class Notification(Base):
+    __tablename__ = 'notifications'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String, nullable=False)      
+    type = Column(String, nullable=False)         
+    message = Column(String, nullable=False)
+    timestamp = Column(DateTime, server_default=func.now())
+    read = Column(Boolean, default=False)

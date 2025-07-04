@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from base import Base
 from sqlalchemy import Column, Integer, String, DateTime 
-from models import Item # Ensure the Item model is imported
+from models import Item, Notification 
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from sqlalchemy.sql import func
@@ -45,6 +45,65 @@ CORS(app, supports_credentials=True, resources={
         "allow_headers": ["Content-Type", "Authorization"]
     }
 })
+
+# ----------------------
+# Notifications Endpoints
+# ----------------------
+
+@app.route('/notifications/<string:user_id>', methods=['GET'])
+@login_required
+def get_notifications(user_id):
+    try:
+        notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.timestamp.desc()).all()
+        return jsonify([
+            {
+                'id': n.id,
+                'type': n.type,
+                'message': n.message,
+                'timestamp': n.timestamp.isoformat(),
+                'read': n.read
+            }
+            for n in notifications
+        ]), 200
+    except Exception as e:
+        return jsonify({"error": f"Error fetching notifications: {str(e)}"}), 500
+
+
+@app.route('/notifications/<int:notif_id>/mark-read', methods=['PATCH'])
+@login_required
+def mark_notification_read(notif_id):
+    notif = Notification.query.get(notif_id)
+    if not notif:
+        return jsonify({"error": "Notification not found"}), 404
+
+    notif.read = True
+    db.session.commit()
+    return jsonify({"status": "Notification marked as read"}), 200
+
+
+@app.route('/notifications', methods=['POST'])
+@login_required
+def create_notification():
+    """Create a new notification."""
+    data = request.get_json()
+    required_fields = ['user_id', 'type', 'message']
+
+    if not all(data.get(field) for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        notif = Notification(
+            user_id=data['user_id'],
+            type=data['type'],
+            message=data['message'],
+            timestamp=datetime.utcnow(),
+            read=False
+        )
+        db.session.add(notif)
+        db.session.commit()
+        return jsonify({"message": "Notification created", "id": notif.id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Error creating notification: {str(e)}"}), 400
 
 # ----------------------
 # Generator Endpoints
