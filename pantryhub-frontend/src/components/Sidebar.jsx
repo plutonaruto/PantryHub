@@ -18,6 +18,7 @@ export default function Sidebar() {
                 <Link to="/equipment" className="nav-link">Equipment</Link>
                 <Link to="/profile" className="nav-link">Profile</Link>
                 <Link to ="/recipes" className="nav-link">Recipes</Link>
+                <Link to ="/notifications" className="nav-link">Notifications</Link>
             </nav>
            </div>
         </div>
