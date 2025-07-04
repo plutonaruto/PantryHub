@@ -12,9 +12,6 @@ const NavBar = () => {
           </div>
           
           <nav className="flex items-center gap-6">
-            <Link to="/" className="nav-link">
-              Home
-            </Link>
             <Link to="/inventory" className="nav-link">
               Inventory
             </Link>

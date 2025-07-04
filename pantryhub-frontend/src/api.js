@@ -1,7 +1,7 @@
 // not linked to /inventory which is not a backend endpoint
 import { getAuth } from "firebase/auth";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "http://localhost:3000";
 
 async function getAuthToken() {
   const auth = getAuth();

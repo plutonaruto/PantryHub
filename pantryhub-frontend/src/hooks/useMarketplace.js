@@ -10,7 +10,7 @@ export function useMarketplace() {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/marketplace");
+      const res = await axios.get("http://localhost:3000/marketplace");
       setItems(res.data);
     } catch (err) {
       console.error("Error fetching items:", err);
@@ -38,7 +38,7 @@ export function useMarketplace() {
     }
 
     try {
-      await axios.post("http://localhost:5000/marketplace", form, {
+      await axios.post("http://localhost:3000/marketplace", form, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -83,7 +83,7 @@ export function useMarketplace() {
 
     try {
       if (remainingQty <= 0) {
-        await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
+        await axios.patch(`http://localhost:3000/marketplace/${item.id}`, {
           quantity: 0,
           claimed: true
         });
@@ -91,7 +91,7 @@ export function useMarketplace() {
         updated.splice(index, 1);
         setItems(updated);
       } else {
-        await axios.patch(`http://localhost:5000/marketplace/${item.id}`, {
+        await axios.patch(`http://localhost:3000/marketplace/${item.id}`, {
           quantity: remainingQty
         });
         const updated = [...items];

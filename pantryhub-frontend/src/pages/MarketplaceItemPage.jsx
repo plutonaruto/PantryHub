@@ -9,7 +9,7 @@ export default function MarketplaceItemPage() {
   const [item, setItem] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/marketplace/${id}`)
+    axios.get(`http://localhost:3000/marketplace/${id}`)
       .then(res => setItem(res.data))
       .catch(err => console.error(err));
   }, [id]);
@@ -18,7 +18,7 @@ export default function MarketplaceItemPage() {
     if (!item || qty > item.quantity) return;
 
     try {
-      await axios.patch(`http://localhost:5000/marketplace/${id}`, {
+      await axios.patch(`http://localhost:3000/marketplace/${id}`, {
         quantity: item.quantity - qty,
         claimed: item.quantity - qty === 0,
       });
@@ -38,7 +38,7 @@ export default function MarketplaceItemPage() {
   return (
     <LayoutWrapper>
     <div className="p-6">
-      <img src={`http://localhost:5000${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
+      <img src={`http://localhost:3000${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
       <h1 className="text-2xl font-bold">{item.name}</h1>
       <p className="mt-2 text-gray-600">{item.description}</p>
       <p className="mt-2">Pickup Location: <strong>{item.pickup_location}</strong></p>

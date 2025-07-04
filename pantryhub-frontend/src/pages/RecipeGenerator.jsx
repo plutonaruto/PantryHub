@@ -19,7 +19,7 @@ export default function RecipeGenerator() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const response = await fetch("http://localhost:5000/api/generate-recipes", {
+    const response = await fetch("http://localhost:3000/api/generate-recipes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ingredients }),

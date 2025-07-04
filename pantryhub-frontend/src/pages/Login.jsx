@@ -1,6 +1,6 @@
 import { useAuth } from "../firebase/AuthProvider";
 import React, { useState } from 'react'; 
-import Home from "./Home";
+import Inventory from "./Inventory";
 import LeftLogin from '../components/LeftLogin';
 import { Link } from 'react-router-dom';
 
@@ -12,7 +12,7 @@ function Login() {
   const handleLogin = () => login(email, password);
 
   return user ? (
-    <Home />
+    <Inventory />
   ) : (
     <div className="min-h-screen flex flex-col md:flex-row">
       <div className="w-full md:w-1/2 h-screen">

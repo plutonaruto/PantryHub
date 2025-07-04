@@ -13,7 +13,6 @@ export default function Sidebar() {
                 </div>
 
             <nav className="flex flex-col items-center gap-6">
-                <Link to="/" className="nav-link">Home</Link>
                 <Link to="/inventory" className="nav-link">Inventory</Link>
                 <Link to="/marketplace" className="nav-link">Marketplace</Link>
                 <Link to="/equipment" className="nav-link">Equipment</Link>

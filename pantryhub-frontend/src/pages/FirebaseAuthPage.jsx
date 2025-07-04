@@ -3,7 +3,7 @@ import Profile from "./Profile";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getAuth } from "firebase/auth";  
 import React, { useEffect, useState } from 'react'; 
-import Home from "./Home";
+import Inventory from "./Inventory";
 import logo from '../assets/logo.png';
 import LeftLogin from '../components/LeftLogin';
 import { Link } from 'react-router-dom';
@@ -22,7 +22,7 @@ function App() {
   const handleLogin = () => login(email, password)
 
   return user ? (
-    <Home />
+    <Inventory />
   ) : (
     
   <div className="min-h-screen flex flex-col md:flex-row">
