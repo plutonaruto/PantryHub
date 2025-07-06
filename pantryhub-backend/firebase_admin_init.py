@@ -1,5 +1,4 @@
 import os
-os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
 
 import firebase_admin
 from firebase_admin import credentials, auth
@@ -13,7 +12,7 @@ from firebase_admin import credentials, auth
 default_app = firebase_admin.initialize_app(options={"projectId": "pantryhub-login-and-flow"})
 
 # manually set admins 
-uid = "6ewAHhltktiCj0bXRbuJWxw24q2t"
+uid = "MsBjWK6EBfZNA1goGk1svfPglTa2"
 
 try:
     user = auth.get_user(uid)

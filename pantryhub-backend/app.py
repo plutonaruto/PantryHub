@@ -25,13 +25,18 @@ from flask_migrate import Migrate
 from flask import send_from_directory
 from auth.auth_helper import login_required
 
-
-os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-firebase_app = firebase_admin.initialize_app(options={
-    "projectId": "pantryhub-login-and-flow"
-}) 
-
 load_dotenv()
+
+SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+
+if not firebase_admin._apps:
+    if os.getenv("USE_FIREBASE_EMULATOR") == "1":
+        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
+        firebase_admin.initialize_app(options={"projectId": "pantryhub-login-and-flow"})
+    else:
+        cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+        firebase_admin.initialize_app(cred)
+
 
 os.environ["GOOGLE_CLOUD_PROJECT"] = "pantryhub-login-and-flow"
 
@@ -248,12 +253,6 @@ def generate_recipes_simple():
 # ----------------------
 # Login & Register
 # ----------------------
-#SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
-#cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
-
-os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "localhost:9099"
-if not firebase_admin._apps:
-    firebase_admin.initialize_app()             
 
 @app.route('/verify', methods = ['POST'])
 def verify_token():
