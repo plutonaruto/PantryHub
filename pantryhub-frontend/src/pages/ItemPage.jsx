@@ -6,6 +6,7 @@ import TopBar from "../components/layout/Topbar";
 import { api } from "../api";
 
 export default function ItemPage() {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -66,7 +67,7 @@ export default function ItemPage() {
         <Sidebar />
       </div>
       <div className= "flex-1 p-4">
-        <img src={`http://localhost:3000${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
+        <img src={`${API_BASE_URL}${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
         <h1 className="text-2xl font-bold">{item.name}</h1>
         <p className="mt-2 text-gray-600">{item.description}</p>
         <p>Expiry Date: {item.expiry_date}</p>

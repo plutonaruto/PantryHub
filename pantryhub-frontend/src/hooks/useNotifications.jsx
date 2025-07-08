@@ -4,6 +4,7 @@ import { auth } from "../firebase/firebase";
 import { NotificationContext } from "../context/NotificationProvider";
 
 export function NotificationsProvider({ children }) {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,7 +14,7 @@ export function NotificationsProvider({ children }) {
 
     const token = await currentUser.getIdToken();
     const res = await axios.get(
-      `http://localhost:3000/notifications/${currentUser.uid}`,
+      `${API_BASE_URL}/notifications/${currentUser.uid}`,
       {
         headers: {
           Authorization: `Bearer ${token}`

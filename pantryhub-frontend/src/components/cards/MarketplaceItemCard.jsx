@@ -11,7 +11,7 @@ export default function MarketplaceItemCard({ item, onClaim }) {
     <div className=" bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col justify-between">
       {item.imageUrl && (
         <img
-          src={`http://localhost:3000/${item.imageUrl}`}
+          src={`${import.meta.env.VITE_API_URL}${item.imageUrl}`}
           alt={item.name}
           className="max-h-24 w-full object-contain rounded mb-2"
 

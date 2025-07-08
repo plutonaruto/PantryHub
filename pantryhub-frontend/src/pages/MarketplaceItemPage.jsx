@@ -6,12 +6,13 @@ import QuantityClaim from '../components/shared/QuantityClaim';
 import { useAuth } from "../firebase/AuthProvider";
 
 export default function MarketplaceItemPage() {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/marketplace/${id}`)
+    axios.get(`${API_BASE_URL}/marketplace/${id}`)
       .then(res => setItem(res.data))
       .catch(err => console.error(err));
   }, [id]);
@@ -23,7 +24,7 @@ export default function MarketplaceItemPage() {
 
       const remainingQty = item.quantity - qty;
 
-      await axios.patch(`http://localhost:3000/marketplace/${id}`, {
+      await axios.patch(`${API_BASE_URL}/marketplace/${id}`, {
         quantity: item.quantity - qty,
         claimer_id: user.uid,
         claimed: remainingQty <= 0
@@ -44,7 +45,7 @@ export default function MarketplaceItemPage() {
   return (
     <LayoutWrapper>
     <div className="p-6">
-      <img src={`http://localhost:3000${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
+      <img src={`${API_BASE_URL}${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
       <h1 className="text-2xl font-bold">{item.name}</h1>
       <p className="mt-2 text-gray-600">{item.description}</p>
       <p className="mt-2">Pickup Location: <strong>{item.pickup_location}</strong></p>

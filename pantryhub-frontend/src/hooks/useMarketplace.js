@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { auth } from "../firebase/firebase"; // ✅ Add this
+import { auth } from "../firebase/firebase"; 
 import { useAuth } from "../firebase/AuthProvider";
 import { useNotifications } from "../hooks/useNotifications.jsx";
 
 export function useMarketplace() {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,7 +24,7 @@ export function useMarketplace() {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/marketplace");
+      const res = await axios.get(`${API_BASE_URL}/marketplace`);
       setItems(res.data);
       setLoading(false);
     } catch (err) {
@@ -40,7 +41,7 @@ export function useMarketplace() {
     }
     const token = await auth.currentUser.getIdToken();
     const res = await axios.get(
-      `http://localhost:3000/notifications/${auth.currentUser.uid}`,
+      `${API_BASE_URL}/notifications/${auth.currentUser.uid}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -67,7 +68,7 @@ export function useMarketplace() {
     }
 
     try {
-      await axios.post("http://localhost:3000/marketplace", form, {
+      await axios.post(`${API_BASE_URL}/marketplace`, form, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -123,7 +124,7 @@ export function useMarketplace() {
 
     try {
       await axios.patch(
-        `http://localhost:3000/marketplace/${item.id}`,
+        `${API_BASE_URL}/marketplace/${item.id}`,
         {
           quantity: remainingQty < 0 ? 0 : remainingQty,
           claimer_id: auth.currentUser.uid,

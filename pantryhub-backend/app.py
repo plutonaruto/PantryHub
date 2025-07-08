@@ -45,7 +45,12 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={
     r"/*": {
-        "origins": ["http://localhost:5173", "http://localhost:3000"],
+        "origins": [
+            "http://localhost:5173", 
+            "http://localhost:3000", 
+            "https://pantry-hub.netlify.app", 
+            "https://pantryhub.onrender.com"
+        ],
         "methods": ["GET", "POST", "OPTIONS", "PATCH", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
@@ -794,4 +799,4 @@ def get_all_equipment():
     return jsonify(result), 200
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3000)
+    app.run()

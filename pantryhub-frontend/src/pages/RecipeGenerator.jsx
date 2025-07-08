@@ -9,6 +9,7 @@ export default function RecipeGenerator() {
   const [generatedRecipes, setGeneratedRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const { savedRecipes, setSavedRecipes } = useRecipe();
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +20,7 @@ export default function RecipeGenerator() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const response = await fetch("http://localhost:3000/api/generate-recipes", {
+    const response = await fetch(`${API_BASE_URL}//api/generate-recipes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ingredients }),

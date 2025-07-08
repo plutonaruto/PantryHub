@@ -5,6 +5,7 @@ import { useAuth } from "../firebase/AuthProvider"
 import NotificationItem from "../components/cards/NotificationItem";
 
 export default function Notifications() {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +25,7 @@ export default function Notifications() {
         const token = await currentUser.getIdToken();
 
         const res = await axios.get(
-        `http://localhost:3000/notifications/${currentUser.uid}`,
+        `${API_BASE_URL}/notifications/${currentUser.uid}`,
         {
             headers: {
             Authorization: `Bearer ${token}`
