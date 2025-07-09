@@ -56,6 +56,10 @@ CORS(app, supports_credentials=True, resources={
     }
 })
 
+@app.route("/")
+def index():
+    return "Backend is up"
+
 # ----------------------
 # Notifications Endpoints
 # ----------------------
@@ -585,13 +589,14 @@ def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
 
-    print("===> request.form:", dict(request.form))
-    print("===> request.files:", request.files)
+    UPLOADED_FOLDER = os.path.join(os.getcwd(), "uploads")
+    os.makedirs(UPLOADED_FOLDER, exist_ok=True)
+
     #optional image handling
     image_path = None
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
+        image_path = os.path.join(UPLOADED_FOLDER, filename)
         file.save(image_path)
         image_path = f"/uploads/{filename}" #create url
 
