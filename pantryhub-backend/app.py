@@ -393,6 +393,32 @@ class Notification(db.Model):
 with app.app_context():
     db.create_all()
 
+#mark notif as read
+@app.route('/notifications/<int:notification_id>/mark-read', methods=['PATCH'])
+@login_required
+def mark_notification_read(notification_id):
+    try:
+        notif = Notification.query.get(notification_id)
+
+        if not notif:
+            return jsonify({"error": "Notification not found"}), 404
+
+        #check ownership?
+        current_user_id = g.current_user.get('uid')
+        if notif.user_id != current_user_id:
+            return jsonify({"error": "Unauthorized"}), 403
+
+        notif.read = True
+        db.session.commit()
+        return jsonify({"message": "Notification marked as read"}), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error marking notification as read: {str(e)}"}), 500
+
+
+
 # ----------------------
 # Inventory Endpoints
 # ----------------------

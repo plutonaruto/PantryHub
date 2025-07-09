@@ -7,7 +7,7 @@ import { AuthProvider } from "./firebase/AuthProvider";
 //import { MarketplaceFormProvider } from "./components/forms/MarketplaceFormContext";
 import { Toaster } from 'react-hot-toast';
 import { RecipeProvider } from './context/RecipeContext';
-import { NotificationProvider } from './context/NotificationProvider';
+import { NotificationProvider } from './context/NotificationContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

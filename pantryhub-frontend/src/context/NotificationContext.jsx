@@ -1,16 +1,20 @@
 import { createContext, useContext, useState } from "react";
 import axios from "axios";
 import { auth } from "../firebase/firebase";
-import { NotificationContext } from "../context/NotificationProvider";
 
-export function NotificationsProvider({ children }) {
+export const NotificationContext = createContext();
+
+export function NotificationProvider({ children }) {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchNotifications = async () => {
     const currentUser = auth.currentUser;
-    if (!currentUser) return;
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
 
     const token = await currentUser.getIdToken();
     const res = await axios.get(
@@ -22,14 +26,15 @@ export function NotificationsProvider({ children }) {
       }
     );
     setNotifications(res.data);
+    setLoading(false);
   };
 
   return (
-    <NotificationsContext.Provider
+    <NotificationContext.Provider
       value={{ notifications, setNotifications, fetchNotifications, loading }}
     >
       {children}
-    </NotificationsContext.Provider>
+    </NotificationContext.Provider>
   );
 }
 
