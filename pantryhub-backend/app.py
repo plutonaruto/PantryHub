@@ -60,6 +60,16 @@ CORS(app, supports_credentials=True, resources={
 def index():
     return "Backend is up"
 
+from flask import send_from_directory
+
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(
+        os.path.join(os.getcwd(), "uploads"), 
+        filename
+    )
+
+
 # ----------------------
 # Notifications Endpoints
 # ----------------------
