@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { auth } from "../firebase/firebase"; 
 import { useAuth } from "../firebase/AuthProvider";
-import { useNotifications } from "../hooks/useNotifications.jsx";
+import { useNotifications } from "../context/NotificationContext";
 
 export function useMarketplace() {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
