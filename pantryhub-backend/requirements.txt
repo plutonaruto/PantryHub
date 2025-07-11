@@ -17,3 +17,5 @@ psycopg2-binary
 firebase-admin==6.5.0
 pyjwt
 gunicorn
+flask_apscheduler
+
