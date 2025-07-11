@@ -1,8 +1,8 @@
 from supabase import create_client
 import os
 
-SUPABASE_URL = os.getenv("DATBASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_PUBLIC_KEY")
+SUPABASE_URL = os.getenv("DATABASE_URL")
+SUPABASE_KEY = os.getenv("SECRET_SERVICE_KEY") or os.getenv("SUPABASE_PUBLIC_KEY")
 BUCKET_NAME = "marketplace"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
