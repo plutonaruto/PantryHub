@@ -3,7 +3,7 @@ import os
 import uuid
 
 SUPABASE_URL = os.environ.get("DATABASE_URL")
-SUPABASE_PUBLIC_KEY = os.environ.get("SUPABASE_PUBLIC__KEY")
+SUPABASE_PUBLIC_KEY = os.environ.get("SUPABASE_PUBLIC_KEY")
 BUCKET_NAME = "marketplace-images"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_PUBLIC_KEY)
