@@ -3,6 +3,7 @@ import axios from "axios";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import { useAuth } from "../firebase/AuthProvider";
 import { api } from "../api";
+import { useParams } from "react-router-dom";
 
 export default function EquipmentPage() {
   const { id } = useParams();

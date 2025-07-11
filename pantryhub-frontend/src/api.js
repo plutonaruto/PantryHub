@@ -1,6 +1,6 @@
 import { getAuth } from "firebase/auth";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 async function getAuthToken() {
   const auth = getAuth();
@@ -82,4 +82,8 @@ export const api = {
   // Equipment endpoints
   createEquipment: (equipmentData) => makeAuthenticatedRequest('/equipment', 'POST', equipmentData),
   getAllEquipment: () => makeAuthenticatedRequest('/equipment'),
+  getEquipment: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}`),
+  getEquipmentLogs: () => makeAuthenticatedRequest('/equipment/log'),
+  checkIn: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}/checkin`, 'PATCH'),
+  checkOut: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}/checkout`, 'PATCH'),
 };

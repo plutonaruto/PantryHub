@@ -6,6 +6,9 @@ from firebase_admin import auth
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
+        if request.method == "OPTIONS":
+            return '', 200
+        
         print(request.headers)
         #take token out of http header
         header = request.headers.get("Authorization", "")

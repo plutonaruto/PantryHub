@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-export default function EquipmentCard({label, description, usage_instructions, pantry_id}) {
+export default function EquipmentCard({id, label, description, usage_instructions, pantry_id, available }) {
 
   const [warning, setWarning] = useState('');
 
@@ -9,6 +9,7 @@ export default function EquipmentCard({label, description, usage_instructions, p
   const navigate = useNavigate();
 
   return (
+    <Link to = {`${id}`}>
     <div className=" bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col justify-between">
       
       <h3 className="text-lg font-bold text-gray-800">{label}</h3>
@@ -22,8 +23,17 @@ export default function EquipmentCard({label, description, usage_instructions, p
 
     <div className="text-sm text-gray-500 mt-1">
         <p>Pantry Level: {pantry_id}</p>
-      </div>
     </div>
+
+     <div className="text-sm text-gray-500 mt-1">
+        <p>Availability: {available  ? "Available" : "Item is currently in use"} </p>
+    </div>
+
+
+
+     
+    </div>
+  </Link>
 
     )
 }

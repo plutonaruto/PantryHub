@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import ItemPage from './pages/ItemPage';
 import FirebaseAuthPage from './pages/FirebaseAuthPage';
 import Equipment from "./pages/Equipment";
+import EquipmentPage from "./pages/EquipmentPage";
+import EquipmentLog from "./pages/EquipmentLog";
 import Notifications from "./pages/Notifications";
 
 export const router = createBrowserRouter([
@@ -25,6 +27,8 @@ export const router = createBrowserRouter([
   { path:"/login", element: <Login /> },
   { path: "/profile", element: <ProtectedRoute> <Profile /> </ProtectedRoute>},
   { path: "/equipment", element: <ProtectedRoute> <Equipment /> </ProtectedRoute> },
+  { path : "/equipment/:id", element: <ProtectedRoute> <EquipmentPage /> </ProtectedRoute> },
+  { path: "/equipment/log", element: <ProtectedRoute> <EquipmentLog /> </ProtectedRoute> },
   { path: "/notifications", element: <ProtectedRoute><Notifications /></ProtectedRoute> }
 ]);
 

@@ -4,15 +4,15 @@ import firebase_admin
 from firebase_admin import credentials, auth
 
 
-#cred = credentials.Certificate("/serviceAccountKey.json")
-#firebase_admin.initialize_app(cred)
+cred = credentials.Certificate("serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
 
 
 
-default_app = firebase_admin.initialize_app(options={"projectId": "pantryhub-login-and-flow"})
+#default_app = firebase_admin.initialize_app(options={"projectId": "pantryhub-login-and-flow"})
 
 # manually set admins 
-uid = "uH6uARxUy2Wym4LZjdWBbJMWXQm2"
+uid = "T3IXPLZmrYfNW2J9j2KothnLHap1"
 
 try:
     user = auth.get_user(uid)

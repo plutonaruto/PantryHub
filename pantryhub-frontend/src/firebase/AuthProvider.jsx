@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => { //authprovider provides auth con
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-        setUser({ ...firebaseUser, ...userDoc.data() });
+        setUser({ ...firebaseUser, ...userDoc.data(), displayName: firebaseUser.displayName });
       } else {
         setUser(null);
       }

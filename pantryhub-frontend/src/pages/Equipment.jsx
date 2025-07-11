@@ -97,8 +97,10 @@ export default function Equipment() {
                     {filteredItems.map((equipment, index) => (
                         <EquipmentCard 
                         key={equipment.id || index}
+                        id = {equipment.id}
                         label = {equipment.label}
                         description={equipment.description} 
+                        available = {equipment.available}
                         usage_instructions={equipment.usage_instructions} 
                         pantry_id = {equipment.pantry_id}
     
