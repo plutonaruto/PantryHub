@@ -440,7 +440,6 @@ def placeholder_image():
 
 #create new post
 @app.route('/marketplace', methods=['POST'])
-@login_required
 def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
