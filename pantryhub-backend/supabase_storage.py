@@ -1,26 +1,24 @@
 from supabase import create_client
 import os
-import uuid
 
-SUPABASE_URL = os.environ.get("DATABASE_URL")
-SUPABASE_PUBLIC_KEY = os.environ.get("SUPABASE_PUBLIC_KEY")
-BUCKET_NAME = "marketplace-images"
+SUPABASE_URL = os.getenv("DATBASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_PUBLIC_KEY")
+BUCKET_NAME = "marketplace"
 
-supabase = create_client(SUPABASE_URL, SUPABASE_PUBLIC_KEY)
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def upload_file_to_supabase(file_bytes, filename, content_type):
-    unique_filename = f"{uuid.uuid4()}_{filename}"
+    path_in_bucket = f"uploads/{filename}"
 
-    # Upload file
     res = supabase.storage.from_(BUCKET_NAME).upload(
-        unique_filename,
+        path_in_bucket,
         file_bytes,
-        {"content-type": content_type}
+        {"content-type": content_type},
+        upsert=True
     )
 
     if res.get("error"):
         raise Exception(f"Supabase upload failed: {res['error']['message']}")
 
-    public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{unique_filename}"
-
+    public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(path_in_bucket)
     return public_url

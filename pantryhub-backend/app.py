@@ -120,10 +120,7 @@ def register_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
-UPLOADED_FOLDER = os.path.abspath(os.path.join(basedir, '..', 'uploads'))
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOADED_FOLDER'] = UPLOADED_FOLDER
 app.config['MAX_PHOTO_SIZE'] = 16 * 1024 * 1024
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
@@ -137,12 +134,6 @@ migrate = Migrate(app, db) #for any future changes
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-#expose uploads/ as static route
-@app.route('/uploads/<filename>')
-# @login_required
-def uploaded_file(filename):
-    return send_from_directory(os.path.join(os.getcwd(), "uploads"), filename)
 
 # ----------------------
 # Tables
@@ -261,13 +252,19 @@ def create():
     file = request.files.get('image')
 
     #optional image handling
-    image_path = None
+    from supabase_storage import upload_file_to_supabase
 
+    image_url = None
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
-        file.save(image_path)
-        image_path = f"/uploads/{filename}" #create url
+        content_type = file.mimetype
+        file_bytes = file.read()
+        if not file_bytes:
+            return jsonify({"error": "Empty file"}), 400
+
+        print("Uploading inventory image to Supabase...")
+        image_url = upload_file_to_supabase(file_bytes, filename, content_type)
+        print("Supabase URL:", image_url)
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
     if not all(data.get(field) for field in required_fields):
@@ -277,7 +274,7 @@ def create():
         item = Item(
             name=data['name'],
             quantity=data.get('quantity', 1),
-            image_url = image_path,
+            image_url = image_url,
             room_no=data['room_no'],
             owner_id=data['owner_id'],
             pantry_id=data['pantry_id'],
@@ -331,10 +328,17 @@ def edit(item_id):
     if quantity:
         item.quantity = quantity
 
-    if image:
+    if image and allowed_file(image.filename):
+        from supabase_storage import upload_file_to_supabase
         filename = secure_filename(image.filename)
-        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        item.image_url = f"/uploads/{filename}"
+        content_type = image.mimetype
+        file_bytes = image.read()
+        if not file_bytes:
+            return jsonify({"error": "Empty file"}), 400
+
+        image_url = upload_file_to_supabase(file_bytes, filename, content_type)
+        item.image_url = image_url
+
 
     if expiry_date:
         item.expiry_date = expiry_date
@@ -436,26 +440,30 @@ def placeholder_image():
 
 #create new post
 @app.route('/marketplace', methods=['POST'])
-# @login_required
+@login_required
 def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
 
-    UPLOADED_FOLDER = os.path.join(os.getcwd(), "uploads")
-    os.makedirs(UPLOADED_FOLDER, exist_ok=True)
-
-    #optional image handling
+    # Import here to avoid circular imports
     from supabase_storage import upload_file_to_supabase
 
+    public_url = None
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         content_type = file.mimetype
-        # file.stream is a file-like object
-        public_url = upload_file_to_supabase(file.stream.read(), filename, content_type)
-    else:
-        public_url = None
+        file_bytes = file.read()
+        if not file_bytes:
+            return jsonify({"error": "Empty file"}), 400
 
-    required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date', 'pickup_location', 'instructions']
+        print("Uploading to Supabase...")
+        public_url = upload_file_to_supabase(file_bytes, filename, content_type)
+        print("Supabase URL:", public_url)
+
+    required_fields = [
+        'name', 'quantity', 'room_no', 'owner_id',
+        'pantry_id', 'expiry_date', 'pickup_location', 'instructions'
+    ]
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
@@ -466,25 +474,23 @@ def create_marketitem():
             room_no=data['room_no'],
             owner_id=data['owner_id'],
             pantry_id=int(data['pantry_id']),
-            image_url = public_url, 
+            image_url=public_url,
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
             created_at=datetime.utcnow(),
-            description=data.get('description', ''), #use .get in case its missing
+            description=data.get('description', ''),
             claimed=False,
             instructions=data['instructions'],
             pickup_location=data['pickup_location']
-            
         )
         db.session.add(market_item)
         db.session.commit()
 
-        return jsonify({
-            "message": "Item created successfully", 
-            "id": market_item.id}), 201
+        return jsonify({"message": "Item created successfully", "id": market_item.id}), 201
 
     except Exception as e:
-        print("Exception while creating item:", str(e)) #debugging purposes
-        return jsonify({"error": f"Error creating item: {str(e)}"}), 400
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error creating item: {str(e)}"}), 500
 
 @app.route('/marketplace/<int:market_item_id>', methods=['PATCH'])
 def update_marketplace_item(market_item_id):
