@@ -13,8 +13,8 @@ def upload_file_to_supabase(file_bytes, filename, content_type):
     res = supabase.storage.from_(BUCKET_NAME).upload(
         path_in_bucket,
         file_bytes,
-        {"content-type": content_type},
-        upsert=True
+        {"content-type": content_type,
+        "upsert": True}
     )
 
     if res.get("error"):
