@@ -602,7 +602,6 @@ def get_all_items_admin():
 # ----------------------
 # Marketplace Endpoints
 # ----------------------
-# TEMP: Commented out for development. Re-enable when frontend auth is complete.
 
 # for items with no image input
 @app.route('/placeholder.jpg')
@@ -775,7 +774,7 @@ def get_marketplace_items():
             "pickup_location": item.pickup_location,
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
             "description": item.description,
-            "imageUrl": item.image_url or "/placeholder.jpg",
+            "image_url": item.image_url or "/placeholder.jpg",
             "claimed": item.claimed,
             "instructions": item.instructions
         })

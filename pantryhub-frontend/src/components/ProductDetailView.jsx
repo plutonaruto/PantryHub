@@ -7,7 +7,7 @@ const sampleProduct = {
   name: "Chocolate Cake",
   description: "Chocolate cake from Awfully Chocolate.",
   expiry_date: "08/07/25",
-  imageUrl: null,
+  image_url: null,
   quantity: 1
 };
 
