@@ -12,7 +12,7 @@ from firebase_admin import credentials, auth
 default_app = firebase_admin.initialize_app(options={"projectId": "pantryhub-login-and-flow"})
 
 # manually set admins 
-uid = "MsBjWK6EBfZNA1goGk1svfPglTa2"
+uid = "uH6uARxUy2Wym4LZjdWBbJMWXQm2"
 
 try:
     user = auth.get_user(uid)
