@@ -1,18 +1,26 @@
-import requests
+from supabase import create_client
 import os
+import uuid
 
-SUPABASE_URL = os.environ["DATABASE_URL"]
-SUPABASE_SERVICE_KEY = os.environ["SERVICE_KEY"]
-BUCKET_NAME = "marketplace-uploads"
+SUPABASE_URL = os.environ.get("DATABASE_URL")
+SUPABASE_PUBLIC_KEY = os.environ.get("SUPABASE_PUBLIC__KEY")
+BUCKET_NAME = "marketplace-images"
 
-def upload_file_to_supabase(file_stream, filename, content_type):
-    url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{filename}"
-    headers = {
-        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
-        "Content-Type": content_type
-    }
-    resp = requests.post(url, headers=headers, data=file_stream)
-    if resp.status_code not in [200, 201]:
-        raise Exception(f"Upload failed: {resp.status_code} {resp.text}")
-    # Public URL:
-    return f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{filename}"
+supabase = create_client(SUPABASE_URL, SUPABASE_PUBLIC_KEY)
+
+def upload_file_to_supabase(file_bytes, filename, content_type):
+    unique_filename = f"{uuid.uuid4()}_{filename}"
+
+    # Upload file
+    res = supabase.storage.from_(BUCKET_NAME).upload(
+        unique_filename,
+        file_bytes,
+        {"content-type": content_type}
+    )
+
+    if res.get("error"):
+        raise Exception(f"Supabase upload failed: {res['error']['message']}")
+
+    public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{unique_filename}"
+
+    return public_url
