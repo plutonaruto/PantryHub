@@ -24,6 +24,7 @@ from sqlalchemy.sql import func
 from flask_migrate import Migrate
 from flask import send_from_directory
 from auth.auth_helper import login_required
+from flask_apscheduler import APScheduler
 
 load_dotenv()
 
@@ -56,209 +57,22 @@ CORS(app, supports_credentials=True, resources={
     }
 })
 
+# Scheduler for expiry scan
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+@scheduler.task('interval', id='expiry_scan', hours=24)
+def scan_for_expired_items():
+    with app.app_context():
+        today = date.today()
+        expired_items = Item.query.filter(Item.expiry_date < today).all()
+        for item in expired_items:
+            print(f"{item.name} (ID: {item.id}) has expired.")
+
 @app.route("/")
 def index():
     return "Backend is up"
-
-
-# ----------------------
-# Notifications Endpoints
-# ----------------------
-
-@app.route('/notifications/<string:user_id>', methods=['GET'])
-@login_required
-def get_notifications(user_id):
-    try:
-        print(f"Fetching notifications for {user_id}")
-        notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.timestamp.desc()).all()
-        return jsonify([
-            {
-                'id': n.id,
-                'type': n.type,
-                'message': n.message,
-                'timestamp': n.timestamp.isoformat(),
-                'read': n.read
-            }
-            for n in notifications
-        ]), 200
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": f"Error fetching notifications: {str(e)}"}), 500
-
-@app.route('/notifications', methods=['POST'])
-@login_required
-def create_notification():
-    """Create a new notification."""
-    data = request.get_json()
-    required_fields = ['user_id', 'type', 'message']
-
-    if not all(data.get(field) for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
-
-    try:
-        notif = Notification(
-            user_id=data['user_id'],
-            type=data['type'],
-            message=data['message'],
-            timestamp=datetime.utcnow(),
-            read=False
-        )
-        db.session.add(notif)
-        db.session.commit()
-        return jsonify({"message": "Notification created", "id": notif.id}), 201
-    except Exception as e:
-        return jsonify({"error": f"Error creating notification: {str(e)}"}), 400
-
-# ----------------------
-# Generator Endpoints
-# ----------------------
-@app.route('/api/generate-recipes', methods=['POST'])
-def generate_recipes():
-    data = request.get_json()
-    ingredients = data.get('ingredients')
-
-    if not ingredients:
-        return jsonify({"error": "No ingredients provided"}), 400
-
-    recipes = None
-
-    recipes = recipes = try_together_ai_with_retry(ingredients, max_retries=3)
-    if recipes:
-        return jsonify({"recipes": recipes, "source": "together"})
-    
-    # fallback, use template recipes
-    recipes = create_fallback_recipes(ingredients)
-    return jsonify({"recipes": recipes, "source": "fallback"})
-
-def try_together_ai_with_retry(ingredients, max_retries=3, base_delay=1):
-    for attempt in range(max_retries):
-        print(f"Together AI attempt {attempt + 1}/{max_retries}")
-        
-        recipes = try_together_ai(ingredients)
-        if recipes:
-            return recipes
-        
-        #wait before retrying
-        if attempt < max_retries - 1:
-            delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
-            print(f"Retrying in {delay:.2f} seconds...")
-            time.sleep(delay)
-    
-    print(f"All {max_retries} attempts failed")
-    return None
-
-def try_together_ai(ingredients):
-    api_key = os.environ.get('TOGETHER_API_KEY')
-    if not api_key:
-        return None
-    
-    try:
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "model": "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are a recipe generator. Respond only with valid JSON array format. Include measurements for the ingredients"
-                },
-                {
-                    "role": "user",
-                    "content": f"Generate 5 simple recipes using: {', '.join(ingredients)}. Format: [{{\"name\": \"Recipe Name\", \"ingredients\": [\"ingredient1\", \"ingredient2\"]}}]"
-                }
-            ],
-            "max_tokens": 400,
-            "temperature": 0.7
-        }
-        
-        response = requests.post(
-            "https://api.together.xyz/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=30
-        )
-        
-        print(f"Together AI Response Status: {response.status_code}")
-        print(f"Together AI Response: {response.text}")
-        
-        if response.status_code == 200:
-            result = response.json()
-            content = result['choices'][0]['message']['content']
-            
-            # extract JSON 
-            start_idx = content.find('[')
-            end_idx = content.rfind(']') + 1
-            if start_idx != -1 and end_idx != 0:
-                json_str = content[start_idx:end_idx]
-                return json.loads(json_str)
-                
-    except Exception as e:
-        print(f"Together AI error: {e}")
-        return None
-
-def create_fallback_recipes(ingredients):
-    if not ingredients:
-        return []
-    
-    primary_ingredient = ingredients[0].title()
-    
-    # Recipe templates 
-    recipe_templates = [
-        {
-            "name": f"Simple {primary_ingredient} Stir-fry",
-            "ingredients": ingredients[:3] + ["vegetable oil", "salt", "black pepper", "garlic"]
-        },
-        {
-            "name": f"Fresh {primary_ingredient} Salad", 
-            "ingredients": ingredients[:2] + ["mixed greens", "olive oil", "lemon juice"]
-        },
-        {
-            "name": f"Grilled {primary_ingredient}",
-            "ingredients": ingredients[:2] + ["olive oil", "herbs", "salt", "pepper"]
-        },
-        {
-            "name": f"Hearty {primary_ingredient} Soup",
-            "ingredients": ingredients[:3] + ["vegetable broth", "onion", "carrots"]
-        },
-        {
-            "name": f"Baked {primary_ingredient} Delight",
-            "ingredients": ingredients[:2] + ["butter", "seasoning blend", "breadcrumbs"]
-        }
-    ]
-    
-    return recipe_templates
-
-# Test endpoint
-@app.route('/api/test-apis', methods=['GET'])
-def test_apis():
-    results = {}
-    
-    if os.environ.get('TOGETHER_API_KEY'):
-        results['together'] = 'API key present'
-    else:
-        results['together'] = 'No API key'
-    
-    return jsonify(results)
-
-# Quick recipe generation endpoint (no AI)
-@app.route('/api/generate-recipes', methods=['POST', 'OPTIONS'])
-def generate_recipes_simple():
-    """Generate recipes using templates only - always works"""
-    if request.method == 'OPTIONS':
-        return '', 200
-        
-    data = request.get_json(force=True)  
-    ingredients = data.get('ingredients', []) if data else []
-    
-    if not ingredients:
-        return jsonify({"error": "No ingredients provided"}), 400
-    
-    recipes = create_fallback_recipes(ingredients)
-    return jsonify({"recipes": recipes, "source": "template"})
 
 # ----------------------
 # Login & Register
@@ -375,10 +189,24 @@ class Equipment(db.Model):
     pantry_id = db.Column(db.Integer, nullable=False)
     description = db.Column(db.Text, nullable=True)
     usage_instructions = db.Column(db.Text, nullable=True)
+    available = db.Column(db.Boolean, nullable=False, default=True)
+    used_by = db.Column(db.String, nullable=True) # user id of who checked it out
+    check_in_date = db.Column(db.DateTime, nullable=True) # when it was checked in
+    check_out_date = db.Column(db.DateTime, nullable=True) # when it was checked out
 
     def __repr__(self): # for debugging
         return f'<Equipment {self.id}>'
-    
+
+#Equipment Log table 
+class EquipmentLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    equipment_id = db.Column(db.Integer, db.ForeignKey('equipment.id'), nullable=False)
+    user_id = db.Column(db.String, nullable=False)
+    action = db.Column(db.String, nullable=False)  # "check_in" or "check_out"
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<EquipmentLog {self.id} {self.action} {self.equipment_id} {self.user_id}>'
 
 # Notification table 
 class Notification(db.Model):
@@ -440,8 +268,6 @@ def create():
         image_path = os.path.join(app.config['UPLOADED_FOLDER'], filename)
         file.save(image_path)
         image_path = f"/uploads/{filename}" #create url
-    
-    image_url = f"/uploads/{filename}" if file and allowed_file(file.filename) else None
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
     if not all(data.get(field) for field in required_fields):
@@ -831,6 +657,378 @@ def get_all_equipment():
 
         })
     return jsonify(result), 200
+
+# ----------------------
+# Equipment Endpoints
+# ----------------------
+
+@app.route('/equipment', methods=['POST'])
+@login_required
+def create_equipment():
+    role = g.current_user.get('role') # check if it is admin
+    if role != 'admin':
+        return jsonify({"error": "Unauthorized. Admin access required"}), 403
+    
+    data = request.form.to_dict()
+    print("Received FORM:", data)
+    required_fields = ['label', 'pantry_id']
+
+    if not all(data.get(field) for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        equipment = Equipment(
+            label=data['label'],
+            pantry_id=data['pantry_id'],
+            description=data.get('description', ''),
+            usage_instructions=data.get('usage_instructions', ''),
+            available = True,
+            used_by = None, 
+            check_in_date = None, 
+            check_out_date = None
+        
+        )
+
+        db.session.add(equipment)
+        db.session.commit()
+        return jsonify({"message": "Equipment created successfully", "id": equipment.id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Error creating equipment: {str(e)}"}), 400
+    
+
+   
+@app.route('/equipment', methods=['GET'])
+@login_required
+def get_all_equipment():
+    equipments = Equipment.query.all()
+    result = []
+    for equipment in equipments :
+        result.append({
+            "id": equipment.id,
+            "label": equipment.label,
+            "pantry_id": equipment.pantry_id,
+            "description": equipment.description,
+            "usage_instructions": equipment.usage_instructions,
+            "available": equipment.available,
+            "used_by": equipment.used_by,
+            "check_in_date": equipment.check_in_date,
+            "check_out_date": equipment.check_out_date
+
+        })
+    return jsonify(result), 200
+
+@app.route('/equipment/<int:equipment_id>', methods=['GET'])
+@login_required
+def get_equipment(equipment_id):
+    equipment = Equipment.query.get(equipment_id)
+    if not equipment:
+        return jsonify({"error": "Equipment not found"}), 404
+    return jsonify({
+        "id": equipment.id,
+        "label": equipment.label,
+        "pantry_id": equipment.pantry_id,
+        "description": equipment.description,
+        "usage_instructions": equipment.usage_instructions,
+        "available": equipment.available,
+        "used_by": equipment.used_by,
+        "check_in_date": equipment.check_in_date,
+        "check_out_date": equipment.check_out_date
+
+        }), 200
+
+@app.route('/equipment/<int:equipment_id>/checkin', methods=['PATCH', 'OPTIONS'])
+@login_required
+def check_in(equipment_id):
+    if flask.request.method == 'OPTIONS':
+        return '', 200
+    
+    equipment = Equipment.query.get(equipment_id)
+
+    if not equipment:
+        return jsonify({"error": "Equipment not found"}), 404
+    
+    if not equipment.available: # equipment alr in use
+        return jsonify({"error": "Equipment is currently in use"}), 400
+    
+    equipment.available = False
+    equipment.used_by = g.current_user.get('uid') # set user using it 
+    equipment.check_in_date = datetime.utcnow()
+    equipment.check_out_date = None # reset check out date
+    db.session.commit()
+
+    log = EquipmentLog(
+        equipment_id = equipment.id,
+        user_id = g.current_user.get('uid'),
+        action = "check_in",
+        timestamp = datetime.utcnow()
+    )
+    db.session.add(log)
+    db.session.commit()
+
+    return jsonify({
+        "message": f"Equipment {equipment.label} checked in successfully",
+        "id": equipment.id,
+        "owner": g.current_user.get('uid') # set user who checked it in
+    }), 200
+
+@app.route('/equipment/<int:equipment_id>/checkout', methods=['PATCH', 'OPTIONS'])
+@login_required
+def check_out(equipment_id):
+    if flask.request.method == 'OPTIONS':
+        return '', 200
+    
+    equipment = Equipment.query.get(equipment_id)
+
+    if not equipment:
+        return jsonify({"error": "Equipment not found"}), 404
+    
+    if equipment.available: # equipment not in use
+        return jsonify({"error": "Equipment is available"}), 400
+    
+    equipment.available = True
+    equipment.used_by = None #reset user 
+    equipment.check_in_date = None #reset check in date
+    equipment.check_out_date = datetime.utcnow()
+    db.session.commit()
+
+    log = EquipmentLog(
+        equipment_id = equipment.id,
+        user_id = g.current_user.get('uid'),
+        action = "check_out",
+        timestamp = datetime.utcnow()
+    )
+    db.session.add(log)
+    db.session.commit()
+    
+
+    return jsonify({
+        "message": f"Equipment {equipment.label} checked out successfully",
+        "id": equipment.id,
+        "owner": g.current_user.get('uid') # set user who checked it out
+    }), 200
+
+@app.route('/equipment/log', methods = ['GET'])
+@login_required
+def get_equipment_log():
+    if g.current_user.get('role') != "admin":
+        return jsonify({"error": "Unauthorized. Admin access required"}), 403
+    
+    # only for admins
+    logs = EquipmentLog.query.order_by(EquipmentLog.timestamp.desc()).all()
+    result = []
+    for log in logs:
+        equipment = Equipment.query.get(log.equipment_id)
+        if equipment:
+            result.append({
+                "id": log.id,
+                "equipment_id": log.equipment_id,
+                "user_id": log.user_id,
+                "action": log.action,
+                "timestamp": log.timestamp.isoformat(),
+                "equipment_label": equipment.label,
+                "pantry_id": equipment.pantry_id
+            })
+
+    return jsonify(result), 200
+
+
+# ----------------------
+# Notifications Endpoints
+# ----------------------
+
+@app.route('/notifications/<string:user_id>', methods=['GET'])
+@login_required
+def get_notifications(user_id):
+    try:
+        print(f"Fetching notifications for {user_id}")
+        notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.timestamp.desc()).all()
+        return jsonify([
+            {
+                'id': n.id,
+                'type': n.type,
+                'message': n.message,
+                'timestamp': n.timestamp.isoformat(),
+                'read': n.read
+            }
+            for n in notifications
+        ]), 200
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error fetching notifications: {str(e)}"}), 500
+
+@app.route('/notifications', methods=['POST'])
+@login_required
+def create_notification():
+    data = request.get_json()
+    required_fields = ['user_id', 'type', 'message']
+
+    if not all(data.get(field) for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        notif = Notification(
+            user_id=data['user_id'],
+            type=data['type'],
+            message=data['message'],
+            timestamp=datetime.utcnow(),
+            read=False
+        )
+        db.session.add(notif)
+        db.session.commit()
+        return jsonify({"message": "Notification created", "id": notif.id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Error creating notification: {str(e)}"}), 400
+
+# ----------------------
+# Generator Endpoints
+# ----------------------
+@app.route('/api/generate-recipes', methods=['POST'])
+def generate_recipes():
+    data = request.get_json()
+    ingredients = data.get('ingredients')
+
+    if not ingredients:
+        return jsonify({"error": "No ingredients provided"}), 400
+
+    recipes = None
+
+    recipes = recipes = try_together_ai_with_retry(ingredients, max_retries=3)
+    if recipes:
+        return jsonify({"recipes": recipes, "source": "together"})
+    
+    # fallback, use template recipes
+    recipes = create_fallback_recipes(ingredients)
+    return jsonify({"recipes": recipes, "source": "fallback"})
+
+def try_together_ai_with_retry(ingredients, max_retries=3, base_delay=1):
+    for attempt in range(max_retries):
+        print(f"Together AI attempt {attempt + 1}/{max_retries}")
+        
+        recipes = try_together_ai(ingredients)
+        if recipes:
+            return recipes
+        
+        #wait before retrying
+        if attempt < max_retries - 1:
+            delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+            print(f"Retrying in {delay:.2f} seconds...")
+            time.sleep(delay)
+    
+    print(f"All {max_retries} attempts failed")
+    return None
+
+def try_together_ai(ingredients):
+    api_key = os.environ.get('TOGETHER_API_KEY')
+    if not api_key:
+        return None
+    
+    try:
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a recipe generator. Respond only with valid JSON array format. Include measurements for the ingredients"
+                },
+                {
+                    "role": "user",
+                    "content": f"Generate 5 simple recipes using: {', '.join(ingredients)}. Format: [{{\"name\": \"Recipe Name\", \"ingredients\": [\"ingredient1\", \"ingredient2\"]}}]"
+                }
+            ],
+            "max_tokens": 400,
+            "temperature": 0.7
+        }
+        
+        response = requests.post(
+            "https://api.together.xyz/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        
+        print(f"Together AI Response Status: {response.status_code}")
+        print(f"Together AI Response: {response.text}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            content = result['choices'][0]['message']['content']
+            
+            # extract JSON 
+            start_idx = content.find('[')
+            end_idx = content.rfind(']') + 1
+            if start_idx != -1 and end_idx != 0:
+                json_str = content[start_idx:end_idx]
+                return json.loads(json_str)
+                
+    except Exception as e:
+        print(f"Together AI error: {e}")
+        return None
+
+def create_fallback_recipes(ingredients):
+    if not ingredients:
+        return []
+    
+    primary_ingredient = ingredients[0].title()
+    
+    # Recipe templates 
+    recipe_templates = [
+        {
+            "name": f"Simple {primary_ingredient} Stir-fry",
+            "ingredients": ingredients[:3] + ["vegetable oil", "salt", "black pepper", "garlic"]
+        },
+        {
+            "name": f"Fresh {primary_ingredient} Salad", 
+            "ingredients": ingredients[:2] + ["mixed greens", "olive oil", "lemon juice"]
+        },
+        {
+            "name": f"Grilled {primary_ingredient}",
+            "ingredients": ingredients[:2] + ["olive oil", "herbs", "salt", "pepper"]
+        },
+        {
+            "name": f"Hearty {primary_ingredient} Soup",
+            "ingredients": ingredients[:3] + ["vegetable broth", "onion", "carrots"]
+        },
+        {
+            "name": f"Baked {primary_ingredient} Delight",
+            "ingredients": ingredients[:2] + ["butter", "seasoning blend", "breadcrumbs"]
+        }
+    ]
+    
+    return recipe_templates
+
+# Test endpoint
+@app.route('/api/test-apis', methods=['GET'])
+def test_apis():
+    results = {}
+    
+    if os.environ.get('TOGETHER_API_KEY'):
+        results['together'] = 'API key present'
+    else:
+        results['together'] = 'No API key'
+    
+    return jsonify(results)
+
+# Quick recipe generation endpoint (no AI)
+@app.route('/api/generate-recipes', methods=['POST', 'OPTIONS'])
+def generate_recipes_simple():
+    """Generate recipes using templates only - always works"""
+    if request.method == 'OPTIONS':
+        return '', 200
+        
+    data = request.get_json(force=True)  
+    ingredients = data.get('ingredients', []) if data else []
+    
+    if not ingredients:
+        return jsonify({"error": "No ingredients provided"}), 400
+    
+    recipes = create_fallback_recipes(ingredients)
+    return jsonify({"recipes": recipes, "source": "template"})
 
 if __name__ == '__main__':
     app.run()
