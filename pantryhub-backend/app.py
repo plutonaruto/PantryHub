@@ -619,12 +619,15 @@ def create_marketitem():
     os.makedirs(UPLOADED_FOLDER, exist_ok=True)
 
     #optional image handling
-    image_path = None
+    from supabase_storage import upload_file_to_supabase
+
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        image_path = os.path.join(UPLOADED_FOLDER, filename)
-        file.save(image_path)
-        image_path = f"/uploads/{filename}" #create url
+        content_type = file.mimetype
+        # file.stream is a file-like object
+        public_url = upload_file_to_supabase(file.stream.read(), filename, content_type)
+    else:
+        public_url = None
 
     required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date', 'pickup_location', 'instructions']
     if not all(data.get(field) for field in required_fields):
@@ -637,7 +640,7 @@ def create_marketitem():
             room_no=data['room_no'],
             owner_id=data['owner_id'],
             pantry_id=int(data['pantry_id']),
-            image_url = image_path, 
+            image_url = public_url, 
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
             created_at=datetime.utcnow(),
             description=data.get('description', ''), #use .get in case its missing
