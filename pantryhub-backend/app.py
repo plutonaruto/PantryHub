@@ -632,55 +632,6 @@ def create_equipment():
             label=data['label'],
             pantry_id=data['pantry_id'],
             description=data.get('description', ''),
-            usage_instructions=data.get('usage_instructions', '')
-        )
-        db.session.add(equipment)
-        db.session.commit()
-        return jsonify({"message": "Equipment created successfully", "id": equipment.id}), 201
-    except Exception as e:
-        return jsonify({"error": f"Error creating equipment: {str(e)}"}), 400
-    
-
-   
-@app.route('/equipment', methods=['GET'])
-@login_required
-def get_all_equipment():
-    equipments = Equipment.query.all()
-    result = []
-    for equipment in equipments :
-        result.append({
-            "id": equipment.id,
-            "label": equipment.label,
-            "pantry_id": equipment.pantry_id,
-            "description": equipment.description,
-            "usage_instructions": equipment.usage_instructions
-
-        })
-    return jsonify(result), 200
-
-# ----------------------
-# Equipment Endpoints
-# ----------------------
-
-@app.route('/equipment', methods=['POST'])
-@login_required
-def create_equipment():
-    role = g.current_user.get('role') # check if it is admin
-    if role != 'admin':
-        return jsonify({"error": "Unauthorized. Admin access required"}), 403
-    
-    data = request.form.to_dict()
-    print("Received FORM:", data)
-    required_fields = ['label', 'pantry_id']
-
-    if not all(data.get(field) for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
-
-    try:
-        equipment = Equipment(
-            label=data['label'],
-            pantry_id=data['pantry_id'],
-            description=data.get('description', ''),
             usage_instructions=data.get('usage_instructions', ''),
             available = True,
             used_by = None, 
