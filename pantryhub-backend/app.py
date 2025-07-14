@@ -14,7 +14,7 @@ import jwt
 from flask import Flask, request, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, date
 from base import Base
 from sqlalchemy import Column, Integer, String, DateTime 
 from models import Item
@@ -27,6 +27,7 @@ from auth.auth_helper import login_required
 from flask_apscheduler import APScheduler
 
 load_dotenv()
+
 
 SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
 
@@ -69,6 +70,7 @@ def scan_for_expired_items():
         expired_items = Item.query.filter(Item.expiry_date < today).all()
         for item in expired_items:
             print(f"{item.name} (ID: {item.id}) has expired.")
+        scan_and_notify_expired_items(expired_items)
 
 @app.route("/")
 def index():
@@ -835,6 +837,30 @@ def create_notification():
         return jsonify({"message": "Notification created", "id": notif.id}), 201
     except Exception as e:
         return jsonify({"error": f"Error creating notification: {str(e)}"}), 400
+
+def scan_and_notify_expired_items(expired_items):
+    for item in expired_items:
+        notif = Notification (
+            user_id = item.owner_id,
+            type = "ITEM_EXPIRED",
+            message = f"Your item ${item.name} has expired. Please remove it from the pantry.",
+            timestamp = datetime.utcnow(),
+            read = False
+        )
+       
+        db.session.add(notif)
+        print(f"Notification created for expired item: {item.name}")
+    db.session.commit()
+        
+
+# test 
+@app.route('/test-expiry-scan', methods=['POST'])
+def test_expiry_scan():
+    today = date.today()
+    expired_items = Item.query.filter(Item.expiry_date < today).all()
+    scan_and_notify_expired_items(expired_items)
+    return jsonify({"message": "Expiry scan triggered"})
+
 
 # ----------------------
 # Generator Endpoints

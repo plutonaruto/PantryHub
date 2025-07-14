@@ -6,9 +6,9 @@ export default function ItemCard({ item, onIncrement, onDecrement, isAdmin }) {
   return (
     <Link to={`/items/${item.id}`} className="block">
       <div className="p-4 border rounded bg-gray-100 cursor-pointer transition-colors hover:bg-[#9C6B98]">
-        {item.imageUrl && (
+        { (item.image_url || item.imageUrl ) && (
           <img
-            src={`${import.meta.env.VITE_API_URL}${item.imageUrl || item.image}`}
+            src={item.image_url || item.imageUrl || '/placeholder.jpg'}
             alt={item.name}
             className="h-14 w-14 object-cover rounded mb-2"
           />

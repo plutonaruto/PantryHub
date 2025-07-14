@@ -67,7 +67,7 @@ export default function ItemPage() {
         <Sidebar />
       </div>
       <div className= "flex-1 p-4">
-        <img src={`${API_BASE_URL}${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
+        <img src={item.image_url || '/placeholder.jpg'} alt={item.name} className="rounded w-96 mb-4" />
         <h1 className="text-2xl font-bold">{item.name}</h1>
         <p className="mt-2 text-gray-600">{item.description}</p>
         <p>Expiry Date: {item.expiry_date}</p>
@@ -93,23 +93,26 @@ export default function ItemPage() {
           }}>
             Remove
           </button>
-        </div>
-          {/* OFFER ON MARKETPLACE 
+        
+
+          {/* OFFER ON MARKETPLACE */}
           <button className="mt-4 bg-white text-black px-4 py-2 rounded"
+          disabled={!item}
           onClick= { () => {
             navigate("/marketplace", {
               state: {
                 prefill: {
                   name: item.name || "",
-                  description: item.description || "",
+                  description: "",
                   imageUrl: item.image_url || "",
-                  expiryDate: item.expiry_date || "",
+                  expiry_date: item.expiry_date || "",
                   quantity: item.quantity || 1,
+                  pickup_location: "", // Add a field for pickup location if needed"",
                 },
               },
             });
           }}>Offer on Marketplace</button>
-        </div> */}
+        </div>
 
         {/* EDIT FORM */}
         { isEditing && (
