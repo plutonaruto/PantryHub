@@ -3,13 +3,26 @@ import React, { useState } from 'react';
 import Inventory from "./Inventory";
 import LeftLogin from '../components/LeftLogin';
 import { Link } from 'react-router-dom';
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 function Login() {
   const { user, login } = useAuth() || {};
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const auth = getAuth();
+
   const handleLogin = () => login(email, password);
+
+  function resetPassword(email) {
+    sendPasswordResetEmail(auth, email)
+    .then(() => {
+      alert("Password reset email sent!");
+    })
+    .catch((error) => {
+      alert("Error sending password reset email:" + error.message);
+    });
+  }
 
   return user ? (
     <Inventory />
@@ -25,6 +38,7 @@ function Login() {
         <button className="text-white font-semibold px-2 py-4 rounded-md bg-[#9C6B98] w-80 mb-2" onClick={handleLogin}>Log In</button>
         <h2 className="text-black text-lg  mb-6">Don't have an account?
           <Link className="font-bold" to="/register"> Sign up </Link>
+          
         </h2>
       </div>
     </div>
