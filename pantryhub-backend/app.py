@@ -970,10 +970,9 @@ def test_apis():
     
     return jsonify(results)
 
-# Quick recipe generation endpoint (no AI)
+# no AI
 @app.route('/api/generate-recipes', methods=['POST', 'OPTIONS'])
 def generate_recipes_simple():
-    """Generate recipes using templates only - always works"""
     if request.method == 'OPTIONS':
         return '', 200
         
@@ -987,4 +986,4 @@ def generate_recipes_simple():
     return jsonify({"recipes": recipes, "source": "template"})
 
 if __name__ == '__main__':
-    app.run(port=3000)
+    app.run()
