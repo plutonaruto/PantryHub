@@ -45,7 +45,17 @@ export default function MarketplaceItemPage() {
   return (
     <LayoutWrapper>
     <div className="p-6">
-      <img src={`${API_BASE_URL}${item.image_url}`} alt={item.name} className="rounded w-96 mb-4" />
+      <img 
+        src={
+                item.image_url
+                ? (item.image_url.startsWith("http")
+                    ? item.image_url
+                    : `${API_BASE_URL}${item.image_url}`)
+                : "/placeholder.jpg"
+              } 
+          alt={item.name} 
+          className="rounded w-96 mb-4" 
+      />
       <h1 className="text-2xl font-bold">{item.name}</h1>
       <p className="mt-2 text-gray-600">{item.description}</p>
       <p className="mt-2">Pickup Location: <strong>{item.pickup_location}</strong></p>

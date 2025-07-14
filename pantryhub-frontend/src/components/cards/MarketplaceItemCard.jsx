@@ -7,11 +7,19 @@ export default function MarketplaceItemCard({ item, onClaim }) {
 
   const navigate = useNavigate();
 
+  console.log("Image URL:", item.image_url);
+
   return (
     <div className=" bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col justify-between">
-      {item.imageUrl && (
+      {item.image_url && (
         <img
-          src={`${import.meta.env.VITE_API_URL}${item.imageUrl}`}
+          src={
+                item.image_url 
+                ? (item.image_url?.startsWith("http")
+                  ? item.image_url
+                  : `${import.meta.env.VITE_API_URL}${item.image_url}`)
+                : "/placeholder.jpg"
+              }
           alt={item.name}
           className="max-h-24 w-full object-contain rounded mb-2"
 
