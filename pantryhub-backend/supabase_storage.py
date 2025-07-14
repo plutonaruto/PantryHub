@@ -5,6 +5,9 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 BUCKET_NAME = "marketplace-uploads"
 
+print("SUPABASE_URL", SUPABASE_URL)
+print("SUPABASE_KEY", "PRESENT" if SUPABASE_KEY else "MISSING")
+
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def upload_file_to_supabase(file_bytes, filename, content_type):
