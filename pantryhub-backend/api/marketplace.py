@@ -1,8 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from models import MarketplaceItem, Notification, db
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from supabase_storage import upload_file_to_supabase  # keep this import here
+from auth.auth_helper import login_required
 
 marketplace_bp = Blueprint('marketplace', __name__)
 
@@ -13,6 +14,7 @@ def allowed_file(filename):
 
 #create new post
 @marketplace_bp.route('/marketplace', methods=['POST'])
+@login_required
 def create_marketitem():
     data = request.form.to_dict()
     file = request.files.get('image')
@@ -30,7 +32,7 @@ def create_marketitem():
         print("Supabase URL:", public_url)
 
     required_fields = [
-        'name', 'quantity', 'room_no', 'owner_id',
+        'name', 'quantity', 'room_no',
         'pantry_id', 'expiry_date', 'pickup_location', 'instructions'
     ]
     if not all(data.get(field) for field in required_fields):
@@ -41,7 +43,7 @@ def create_marketitem():
             name=data['name'],
             quantity=int(data.get('quantity', 1)),
             room_no=data['room_no'],
-            owner_id=data['owner_id'],
+            owner_id=g.current_user["uid"],
             pantry_id=int(data['pantry_id']),
             image_url=public_url,
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
@@ -62,6 +64,7 @@ def create_marketitem():
         return jsonify({"error": f"Error creating item: {str(e)}"}), 500
 
 @marketplace_bp.route('/marketplace/<int:market_item_id>', methods=['PATCH'])
+@login_required
 def update_marketplace_item(market_item_id):
     market_item = MarketplaceItem.query.get(market_item_id)
     if not market_item:
@@ -70,7 +73,7 @@ def update_marketplace_item(market_item_id):
     data = request.get_json()
     print("PATCH data:", data)
 
-    claimer_id = data.get('claimer_id')
+    claimer_id = g.current_user["uid"]
     claimed = data.get('claimed')
 
     if 'quantity' in data:
@@ -88,8 +91,6 @@ def update_marketplace_item(market_item_id):
         market_item.name = data['name']
     if 'room_no' in data:
         market_item.room_no = data['room_no']
-    if 'owner_id' in data:
-        market_item.owner_id = data['owner_id']
     if 'pantry_id' in data:
         market_item.pantry_id = data['pantry_id']
     if 'image_url' in data:
@@ -142,6 +143,7 @@ def update_marketplace_item(market_item_id):
 
 # get an item
 @marketplace_bp.route('/marketplace/<int:item_id>', methods=['GET'])
+@login_required
 def get_marketplace_item(item_id):
     item = MarketplaceItem.query.get(item_id)
     if not item:
@@ -166,7 +168,7 @@ def get_marketplace_item(item_id):
 
 #fetch all items
 @marketplace_bp.route('/marketplace', methods=['GET'])
-# @login_required
+@login_required
 def get_marketplace_items():
     items = MarketplaceItem.query.filter_by(claimed=False).all() #fetch unclaimed only
     result = []

@@ -1,54 +1,8 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { auth } from "../firebase/firebase";
-import { useAuth } from "../firebase/AuthProvider"
+import { useNotifications } from "../context/NotificationContext";
 import NotificationItem from "../components/cards/NotificationItem";
 
 export default function Notifications() {
-  const API_BASE_URL = import.meta.env.VITE_API_URL;
-  const { user } = useAuth();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
- useEffect(() => {
-  const fetchNotifications = async () => {
-    try {
-        const currentUser = auth.currentUser;
-
-        if (!currentUser) {
-        setError("User not logged in.");
-        setLoading(false);
-        return;
-        }
-
-        const token = await currentUser.getIdToken();
-
-        const res = await axios.get(
-        `${API_BASE_URL}/notifications/${currentUser.uid}`,
-        {
-            headers: {
-            Authorization: `Bearer ${token}`
-            }
-        }
-        );
-
-        if (Array.isArray(res.data)) {
-        setNotifications(res.data);
-        } else {
-        setNotifications([]);
-        console.error("Unexpected response:", res.data);
-        }
-    } catch (err) {
-        console.error("Error fetching notifications:", err);
-        setError("Failed to load notifications.");
-    } finally {
-        setLoading(false);
-    }
-  };
-
-    fetchNotifications();
-  }, [user]);
+  const { notifications, setNotifications, loading, error } = useNotifications();
 
   if (loading) return <div>Loading notifications...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

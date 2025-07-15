@@ -65,7 +65,7 @@ async function makeAuthenticatedRequest(endpoint, method = 'GET', body = null) {
 
 export const api = {
   // Inventory endpoints
-  // You must provide the owner_id when fetching all items for a user
+  // must provide the owner_id when fetching all items for a user
   getAllItems: () => makeAuthenticatedRequest('/items'),
   getUserItems: (ownerId) => makeAuthenticatedRequest(`/items/${ownerId}`),
   fetchItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`),
@@ -78,6 +78,11 @@ export const api = {
   getMarketplaceItems: () => makeAuthenticatedRequest('/marketplace'),
   createMarketplaceItem: (itemData) => makeAuthenticatedRequest('/marketplace', 'POST', itemData),
   updateMarketplaceItem: (itemId, updates) => makeAuthenticatedRequest(`/marketplace/${itemId}`, 'PATCH', updates),
+  fetchMarketplaceItem: (id) => makeAuthenticatedRequest(`/marketplace/${id}`),
+
+  // Notification endpoints
+  getNotifications: (userId) => makeAuthenticatedRequest(`/notifications/${userId}`),
+  markNotificationRead: (notifId) => makeAuthenticatedRequest(`/notifications/${notifId}/mark-read`, 'PATCH'),
 
   // Equipment endpoints
   createEquipment: (equipmentData) => makeAuthenticatedRequest('/equipment', 'POST', equipmentData),

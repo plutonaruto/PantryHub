@@ -1,9 +1,13 @@
-import axios from "axios";
+import { api } from "../../api";
 
 export default function NotificationItem({ notification, onMarkRead }) {
   const markAsRead = async () => {
-    await axios.patch(`/notifications/${notification.id}/mark-read`);
-    onMarkRead(notification.id);
+    try {
+      await api.markNotificationRead(notification.id);
+      onMarkRead(notification.id);
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
   };
 
   return (
