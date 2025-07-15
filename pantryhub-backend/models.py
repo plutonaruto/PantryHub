@@ -14,7 +14,6 @@ class Item(Base):
     __table_args__ = (
         CheckConstraint('quantity >= 0', name='check_quantity'),
     )
-
     
     id = Column(Integer, primary_key=True)
     name = Column(String(150), nullable=False)
