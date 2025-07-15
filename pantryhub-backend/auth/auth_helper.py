@@ -8,25 +8,26 @@ def login_required(f):
     def wrapper(*args, **kwargs):
         if request.method == "OPTIONS":
             return '', 200
+
+        print("Request headers:", dict(request.headers))
         
-        print(request.headers)
-        #take token out of http header
         header = request.headers.get("Authorization", "")
-        parts  = header.split()
+        parts = header.split()
         if len(parts) != 2 or parts[0].lower() != "bearer":
             return jsonify({"error": "Missing or invalid Authorization header"}), 401
+
         id_token = parts[1]
 
         try:
             decoded = auth.verify_id_token(id_token)
-        except Exception:
-            return jsonify({"error": "Invalid or expired token"}), 401
-        
+        except Exception as e:
+            print("🔥 Token verification error:", repr(e))
+            return jsonify({"error": f"Invalid or expired token: {str(e)}"}), 401
+
         g.user_id = decoded["uid"]
         g.current_user = decoded
         return f(*args, **kwargs)
     return wrapper
-
 
     
 

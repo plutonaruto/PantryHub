@@ -1,12 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/layout/Topbar";
 import { api } from "../api";
 
 export default function ItemPage() {
-  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const [isEditing, setIsEditing] = useState(false);

@@ -105,8 +105,10 @@ const updateItem = async (itemId, updates) => {
 };
 
   useEffect(() => {
-    fetchItems();
-  }, []);
+    if (user && user.uid) {
+      fetchItems();
+    }
+  }, [user]);
 
   return { items, formData, addItem, updateForm, onImageChange, setItems, adjustQty, removeItem, fetchItem, updateItem};
 }
