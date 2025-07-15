@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
@@ -37,7 +37,7 @@ def create():
         image_url = upload_file_to_supabase(file_bytes, filename, content_type)
         print("Supabase URL:", image_url)
 
-    required_fields = ['name', 'quantity', 'room_no', 'owner_id', 'pantry_id', 'expiry_date']
+    required_fields = ['name', 'quantity', 'room_no', 'pantry_id', 'expiry_date']
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
@@ -47,7 +47,7 @@ def create():
             quantity=data.get('quantity', 1),
             image_url = image_url,
             room_no=data['room_no'],
-            owner_id=data['owner_id'],
+            owner_id=g.current_user["uid"],
             pantry_id=data['pantry_id'],
             expiry_date=datetime.strptime(data['expiry_date'], '%Y-%m-%d').date(),
             created_at=datetime.utcnow()
