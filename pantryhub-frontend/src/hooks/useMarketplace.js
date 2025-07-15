@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react"; 
-import { useAuth } from "../firebase/AuthProvider";
-import { useNotifications } from "../context/NotificationContext";
+import { useState, useEffect } from 'react'; 
+import { useAuth } from '../firebase/AuthProvider';
+import { useNotifications } from '../context/NotificationContext';
+import { api } from '../api';
 
 export function useMarketplace() {
   const [items, setItems] = useState([]);

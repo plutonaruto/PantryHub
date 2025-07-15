@@ -74,3 +74,5 @@ __pycache__/
 *.pyc
 uploads/
 .vercel
+
+serviceAccountKey.json
