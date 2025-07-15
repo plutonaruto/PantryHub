@@ -21,7 +21,7 @@ def login_required(f):
         try:
             decoded = auth.verify_id_token(id_token)
         except Exception as e:
-            print("🔥 Token verification error:", repr(e))
+            print("Token verification error:", repr(e))
             return jsonify({"error": f"Invalid or expired token: {str(e)}"}), 401
 
         g.user_id = decoded["uid"]
