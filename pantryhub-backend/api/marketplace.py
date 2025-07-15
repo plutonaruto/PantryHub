@@ -168,7 +168,7 @@ def get_marketplace_items():
     items = MarketplaceItem.query.filter_by(claimed=False).all() #fetch unclaimed only
     result = []
     for item in items:
-        result.marketplace_bpend({
+        result.marketplace_append({
             "id": item.id,
             "name": item.name,
             "quantity": item.quantity,
