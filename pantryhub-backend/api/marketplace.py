@@ -73,7 +73,6 @@ def update_marketplace_item(market_item_id):
     claimer_id = data.get('claimer_id')
     claimed = data.get('claimed')
 
-    # Update fields
     if 'quantity' in data:
         if data['quantity'] is None:
             return jsonify({"error": "Quantity cannot be null"}), 400
@@ -104,15 +103,9 @@ def update_marketplace_item(market_item_id):
     if 'pickup_location' in data:
         market_item.pickup_location = data['pickup_location']
 
-    # If quantity hits 0, delete item and return immediately
-    if market_item.quantity == 0:
-        db.session.delete(market_item)
-        db.session.commit()
-        return jsonify({"message": f"Item {market_item.id} deleted"}), 200
+    print("Claimed?", claimed)
+    print("Claimer ID?", claimer_id)
 
-    db.session.commit()
-
-    # If just claimed, create notifications
     if claimed and claimer_id:
         claimer_notif = Notification(
             user_id=claimer_id,
@@ -130,9 +123,19 @@ def update_marketplace_item(market_item_id):
         )
         db.session.add(claimer_notif)
         db.session.add(owner_notif)
-        db.session.commit()
 
-    # Always return something
+    #delete the item
+    if market_item.quantity == 0:
+        db.session.delete(market_item)
+
+    try:
+        db.session.commit()
+        print("Changes committed.")
+    except Exception as e:
+        db.session.rollback()
+        print("Error committing changes:", str(e))
+        return jsonify({"error": "Failed to update item or create notifications"}), 500
+
     return jsonify({"message": f"Item {market_item.id} updated"}), 200
 
 
