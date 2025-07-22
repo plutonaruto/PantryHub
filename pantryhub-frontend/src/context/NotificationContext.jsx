@@ -15,6 +15,7 @@ export function NotificationProvider({ children }) {
       setLoading(true);
       const currentUser = auth.currentUser;
       if (!currentUser) {
+        
         setError("User not logged in.");
         setNotifications([]);
         setLoading(false);
@@ -33,8 +34,17 @@ export function NotificationProvider({ children }) {
   };
 
   useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setError("User not logged in.");
+        setNotifications([]);
+        setLoading(false);
+        return;
+      }
     fetchNotifications();
-  }, []);
+  });
+  return () => unsubscribe();
+}, []);
 
   return (
     <NotificationContext.Provider

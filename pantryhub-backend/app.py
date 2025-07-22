@@ -6,19 +6,24 @@ from dotenv import load_dotenv
 from models import db
 from flask_apscheduler import APScheduler
 from datetime import datetime
+from flask_socketio import SocketIO
+from firebase_admin_init import *
 
 load_dotenv()
 
+
 import firebase_admin
 from firebase_admin import credentials
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
+
+#cred = credentials.Certificate("serviceAccountKey.json")
+#firebase_admin.initialize_app(cred)
 
 def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAX_PHOTO_SIZE'] = 16 * 1024 * 1024
+
 
     CORS(app, supports_credentials=True, resources={
         r"/*": {
@@ -75,7 +80,8 @@ def create_app():
 
     return app
 
+app = create_app()
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 if __name__ == "__main__":
-    app = create_app()
-    app.run()
+    socketio.run(app, host="0.0.0.0", port=3000)

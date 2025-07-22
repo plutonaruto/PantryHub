@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, g
-from datetime import datetime
+from datetime import datetime, date
 from werkzeug.utils import secure_filename
 
 from models import Item, db
@@ -54,6 +54,7 @@ def create():
         return jsonify({"message": "Item created successfully", "id": item.id}), 201
 
     except Exception as e:
+        print("Error in /items POST:", e)
         return jsonify({"error": f"Error creating item: {str(e)}"}), 400
 
 
@@ -186,4 +187,5 @@ def get_all_items_admin():
             "pantry_id": item.pantry_id,
             "expiry_date": item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else None,
         })
+    
     return jsonify(result), 200

@@ -9,20 +9,21 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Item(Base):
+class Item(db.Model):
     __tablename__ = 'items'
     __table_args__ = (
         CheckConstraint('quantity >= 0', name='check_quantity'),
     )
     
-    id = Column(Integer, primary_key=True)
-    name = Column(String(150), nullable=False)
-    quantity = Column(Integer, nullable=False, default=1)
-    room_no = Column(String(50), nullable=False )
-    owner_id = Column(String(64),  nullable=False)
-    pantry_id = Column(Integer, nullable=False)
-    expiry_date = Column(Date, nullable=True)
-    created_at  = Column(DateTime, default=datetime.utcnow)
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String(150), nullable=False)
+    quantity = db.Column(Integer, nullable=False, default=1)
+    room_no = db.Column(String(50), nullable=False )
+    owner_id = db.Column(String(64),  nullable=False)
+    pantry_id = db.Column(Integer, nullable=False)
+    image_url = db.Column(db.String, nullable=True)
+    expiry_date = db.Column(Date, nullable=True)
+    created_at  = db.Column(DateTime, default=datetime.utcnow)
 
 
 

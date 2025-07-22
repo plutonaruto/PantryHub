@@ -73,17 +73,32 @@ def create_notification():
         return jsonify({"error": f"Error creating notification: {str(e)}"}), 400
 
 def scan_and_notify_expired_items(expired_items):
+    from app import socketio 
     for item in expired_items:
-        notif = Notification (
+        existing = Notification.query.filter_by(
             user_id = item.owner_id,
-            type = "ITEM_EXPIRED",
-            message = f"Your item ${item.name} has expired. Please remove it from the pantry.",
-            timestamp = datetime.utcnow(),
-            read = False
-        )
+            type =  "ITEM_EXPIRED",
+            message = f"Your item {item.name} has expired. Please remove it from the pantry."
+        ).first()
+
+        if not existing:
+            notif = Notification (
+                user_id = item.owner_id,
+                type = "ITEM_EXPIRED",
+                message = f"Your item {item.name} has expired. Please remove it from the pantry.",
+                timestamp = datetime.utcnow(),
+                read = False
+            )
        
-        db.session.add(notif)
-        print(f"Notification created for expired item: {item.name}")
+            db.session.add(notif)
+            socketio.emit("notification", {
+                "user_id": item.owner_id,
+                "type": "ITEM_EXPIRED",
+                "message": f"Your item {item.name} has expired. Please remove it from the pantry.",
+                "timestamp": datetime.utcnow().isoformat(),
+                "read": False
+            })
+            print(f"Notification created for expired item: {item.name}")
     db.session.commit()
         
 

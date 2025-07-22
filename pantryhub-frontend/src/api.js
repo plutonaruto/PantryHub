@@ -67,7 +67,7 @@ export const api = {
   // Inventory endpoints
   // must provide the owner_id when fetching all items for a user
   getAllItems: () => makeAuthenticatedRequest('/items'),
-  getUserItems: (ownerId) => makeAuthenticatedRequest(`/items/${ownerId}`),
+  getUserItems: (ownerId) => makeAuthenticatedRequest(`/items/owner/${ownerId}`),
   fetchItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`),
   createItem: (itemData) => makeAuthenticatedRequest('/items', 'POST', itemData),
   updateItem: (itemId, updates) => makeAuthenticatedRequest(`/items/${itemId}`, 'PATCH', updates),

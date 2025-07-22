@@ -46,7 +46,7 @@ def get_all_equipment():
     equipments = Equipment.query.all()
     result = []
     for equipment in equipments :
-        result.equipment_bpend({
+        result.append({
             "id": equipment.id,
             "label": equipment.label,
             "pantry_id": equipment.pantry_id,
@@ -108,6 +108,15 @@ def check_in(equipment_id):
     db.session.add(log)
     db.session.commit()
 
+    from app import socketio
+    socketio.emit('notification', {
+        "equipment_id": equipment.id,
+        "action": "check_in",
+        "user_id": g.current_user.get('uid'),
+        "timestamp": datetime.utcnow().isoformat(),
+        "read": False
+    }, broadcast=True)
+
     return jsonify({
         "message": f"Equipment {equipment.label} checked in successfully",
         "id": equipment.id,
@@ -142,6 +151,15 @@ def check_out(equipment_id):
     )
     db.session.add(log)
     db.session.commit()
+
+    from app import socketio
+    socketio.emit('notification', {
+        "equipment_id": equipment.id,
+        "action": "check_out",
+        "user_id": g.current_user.get('uid'),
+        "timestamp": datetime.utcnow().isoformat(),
+        "read": False
+    }, broadcast=True)
     
 
     return jsonify({
@@ -162,7 +180,7 @@ def get_equipment_log():
     for log in logs:
         equipment = Equipment.query.get(log.equipment_id)
         if equipment:
-            result.equipment_bpend({
+            result.append({
                 "id": log.id,
                 "equipment_id": log.equipment_id,
                 "user_id": log.user_id,
