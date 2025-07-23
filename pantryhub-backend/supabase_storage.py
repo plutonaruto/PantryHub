@@ -2,7 +2,7 @@ from supabase import create_client
 import os
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY") #os.getenv("SECRET_SERVICE_KEY") or os.getenv("SUPABASE_PUBLIC_KEY")
+SUPABASE_KEY = os.getenv("SECRET_SERVICE_KEY") or os.getenv("SUPABASE_PUBLIC_KEY") #production variables
 BUCKET_NAME = "marketplace-uploads"
 
 print("SUPABASE_URL", SUPABASE_URL)
