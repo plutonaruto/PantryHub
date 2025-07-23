@@ -19,3 +19,4 @@ pyjwt
 gunicorn
 flask_apscheduler
 supabase
+flask_socketio
