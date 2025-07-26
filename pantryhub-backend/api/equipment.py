@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g
 from datetime import datetime
-from models import Equipment, EquipmentLog, db
+from models import Equipment, EquipmentLog, Notification,db
 from auth.auth_helper import login_required
 
 equipment_bp = Blueprint("equipment", __name__)
@@ -105,9 +105,9 @@ def check_in(equipment_id):
         action = "check_in",
         timestamp = datetime.utcnow()
     )
-    db.session.add(log)
-    db.session.commit()
 
+    db.session.add(log)
+    
     from app import socketio
     socketio.emit('notification', {
         "equipment_id": equipment.id,
@@ -115,7 +115,18 @@ def check_in(equipment_id):
         "user_id": g.current_user.get('uid'),
         "timestamp": datetime.utcnow().isoformat(),
         "read": False
-    }, broadcast=True)
+    })
+
+    notif = Notification(
+        user_id = g.current_user.get('uid'),
+        type = "EQUIPMENT_CHECK_IN",
+        message = f"{equipment.label} was checked in by { g.current_user.get('uid')}.",
+        timestamp = datetime.utcnow(),
+        read = False
+    )
+
+    db.session.add(notif)
+    db.session.commit()
 
     return jsonify({
         "message": f"Equipment {equipment.label} checked in successfully",
@@ -149,8 +160,8 @@ def check_out(equipment_id):
         action = "check_out",
         timestamp = datetime.utcnow()
     )
+
     db.session.add(log)
-    db.session.commit()
 
     from app import socketio
     socketio.emit('notification', {
@@ -159,8 +170,18 @@ def check_out(equipment_id):
         "user_id": g.current_user.get('uid'),
         "timestamp": datetime.utcnow().isoformat(),
         "read": False
-    }, broadcast=True)
+    })
+
+    notif = Notification(
+        user_id = g.current_user.get('uid'),
+        type = "EQUIPMENT_CHECK_OUT",
+        message = f"{equipment.label} was checked out by { g.current_user.get('uid')}.",
+        timestamp = datetime.utcnow(),
+        read = False
+    )
     
+    db.session.add(notif)
+    db.session.commit()
 
     return jsonify({
         "message": f"Equipment {equipment.label} checked out successfully",
