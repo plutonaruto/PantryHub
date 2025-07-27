@@ -2,7 +2,7 @@ from functools import wraps
 from flask import request, jsonify, g, current_app
 from firebase_admin import auth as firebase_auth
 
-def verify_token():
+def verify_token_internal():
     if current_app.debug:
         print(">>> verify_token called")
 
@@ -34,7 +34,7 @@ def login_required(f):
         if request.method == "OPTIONS":
             return '', 200
 
-        _, error_response, status_code = verify_token()
+        _, error_response, status_code = verify_token_internal()
         if error_response:
             return error_response, status_code
 
