@@ -17,6 +17,7 @@ psycopg2-binary
 firebase-admin==6.5.0
 pyjwt
 gunicorn
-flask_apscheduler
+flask_apscheduler==1.12.5
 supabase
-flask_socketio
+Flask-SocketIO==5.3.6
+eventlet==0.33.3
