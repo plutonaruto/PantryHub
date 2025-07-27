@@ -107,15 +107,6 @@ def check_in(equipment_id):
     )
 
     db.session.add(log)
-    
-    from app import socketio
-    socketio.emit('notification', {
-        "equipment_id": equipment.id,
-        "action": "check_in",
-        "user_id": g.current_user.get('uid'),
-        "timestamp": datetime.utcnow().isoformat(),
-        "read": False
-    })
 
     notif = Notification(
         user_id = g.current_user.get('uid'),
@@ -162,15 +153,6 @@ def check_out(equipment_id):
     )
 
     db.session.add(log)
-
-    from app import socketio
-    socketio.emit('notification', {
-        "equipment_id": equipment.id,
-        "action": "check_out",
-        "user_id": g.current_user.get('uid'),
-        "timestamp": datetime.utcnow().isoformat(),
-        "read": False
-    })
 
     notif = Notification(
         user_id = g.current_user.get('uid'),
