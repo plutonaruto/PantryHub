@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g
 from firebase_admin import auth as firebase_auth
-from auth.auth_helper import login_required
+from user_auth.auth_helper import login_required
 
 auth_bp = Blueprint("auth", __name__)
 
