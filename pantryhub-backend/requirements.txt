@@ -19,4 +19,4 @@ gunicorn
 flask_apscheduler
 supabase
 Flask-SocketIO==5.3.6
-eventlet==0.33.3
+gevent
