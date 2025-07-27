@@ -18,7 +18,7 @@ def generate_recipes():
 
     recipes = None
 
-    recipes = recipes = try_together_ai_with_retry(ingredients, max_retries=3)
+    recipes = try_together_ai_with_retry(ingredients, max_retries=3)
     if recipes:
         return jsonify({"recipes": recipes, "source": "together"})
     
@@ -50,11 +50,10 @@ def try_together_ai(ingredients):
     
     try:
         headers = {
-            "Authorization": f"Bearer {
-                api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
-        
+
         payload = {
             "model": "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
             "messages": [
@@ -79,7 +78,7 @@ def try_together_ai(ingredients):
                 )
                 }
             ],
-            "max_tokens": 400,
+            "max_tokens": 800,
             "temperature": 0.7
         }
         
@@ -178,7 +177,7 @@ def test_apis():
 
 # no AI
 
-@recipes_bp.route('/api/generate-recipes', methods=['POST', 'OPTIONS'])
+@recipes_bp.route('/api/generate-recipes-template', methods=['POST', 'OPTIONS'])
 def generate_recipes_simple():
     if request.method == 'OPTIONS':
         return '', 200
