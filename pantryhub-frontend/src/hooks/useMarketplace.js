@@ -143,5 +143,6 @@ export function useMarketplace() {
     onImageChange,
     fetchItems,
     getRecentItems,
+    setItems
   };
 }

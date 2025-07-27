@@ -66,6 +66,10 @@ const Marketplace = () => {
     }
   };
 
+  const handleDelete = (deletedItemId) => {
+    setItems(prevItems => prevItems.filter(item => item.id !== deletedItemId));
+  };
+
   const cartImage = 'https://img.freepik.com/premium-psd/3d-illustration-supermarket-shopping-cart-with-grocery_763562-48.jpg';
 
   return (
@@ -141,6 +145,7 @@ const Marketplace = () => {
                   onClaim={(qty) => claimItem(index, qty)}
                   currentUserId={user?.uid}
                   isAdmin={isAdmin}
+                  onDelete={handleDelete} 
                 />
               ))}
             </div>

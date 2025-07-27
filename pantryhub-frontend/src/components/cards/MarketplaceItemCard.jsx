@@ -17,7 +17,7 @@ export default function MarketplaceItemCard({ item, onClaim }) {
     if (!confirm) return;
     try {
       await api.deleteMarketplaceItem(item.id);
-      window.location.reload(); 
+      if (onDelete) onDelete(item.id);
     } catch (err) {
       console.error("Failed to delete item:", err);
     }
