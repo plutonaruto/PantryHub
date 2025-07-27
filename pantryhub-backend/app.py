@@ -79,7 +79,8 @@ def create_app():
     return app
 
 app = create_app()
-socketio = SocketIO(app, cors_allowed_origins="*")
+#   socketio = SocketIO(app, cors_allowed_origins="*")
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=3000)
+    app.run()
+    #socketio.run(app, host="0.0.0.0", port=3000)
