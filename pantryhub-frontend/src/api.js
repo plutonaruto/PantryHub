@@ -2,62 +2,73 @@ import { getAuth } from "firebase/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+/**
+ * Get the current Firebase ID token.
+ */
 async function getAuthToken() {
   const auth = getAuth();
   const user = auth.currentUser;
+
   if (!user) {
-    window.location.href = "/register";
+    console.warn("User not authenticated.");
     return null;
   }
 
   try {
     const idToken = await user.getIdToken();
-    console.log("idToken:", idToken);
+    console.log("Firebase ID Token:", idToken);
     return idToken;
   } catch (error) {
-    console.error("Error in fetching ID token:", error);
+    console.error("Error fetching Firebase ID token:", error);
     return null;
   }
 }
 
-async function makeAuthenticatedRequest(endpoint, method = 'GET', body = null) {
-    try {
-        const idToken = await getAuthToken(); //get firebase id token
-        console.log("idToken:", idToken);
-        if (!idToken) {
-            console.error("ID Token is missing. Redirecting to login...");
-            return;
-        }
+async function makeAuthenticatedRequest(endpoint, method = "GET", body = null) {
+  const idToken = await getAuthToken();
 
-        const headers = {
-            "Authorization" : `Bearer ${idToken}`, 
-        };
+  if (!idToken) {
+    console.warn("No token found");
+    return { error: "User not logged in", status: 401 };
+  }
 
-        const config = {
-            method,
-            headers,
-            credentials: 'include',
-        };
+  const headers = {
+    "Authorization": `Bearer ${idToken}`,
+    "Accept": "application/json",
+  };
 
-        if (body) {
-            if (body instanceof FormData) {
-                config.body = body;      
-            } else {
-                headers["Content-Type"] = "application/json";
-                config.body = JSON.stringify(body);
-            }
+  const config = {
+    method,
+    headers,
+    credentials: "include",
+  };
 
-        }
+  if (body) {
+    if (body instanceof FormData) {
+      config.body = body;
+    } else {
+      headers["Content-Type"] = "application/json";
+      config.body = JSON.stringify(body);
+    }
+  }
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const contentType = response.headers.get("Content-Type");
 
-        if (!response.ok) {
-            throw new Error(`Error! Status : ${response.status}`)
+    if (!response.ok) {
+      const errorText = contentType && contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+      throw new Error(`Error ${response.status}: ${response.statusText} - ${JSON.stringify(errorText)}`);
+    }
 
-        }
-
-        return await response.json();
-        } catch (error) {
+    if (contentType && contentType.includes("application/json")) {
+      return await response.json();
+    } else {
+      return await response.text();
+    }
+  } catch (error) {
     console.error("API request failed:", error);
     throw error;
   }
@@ -65,30 +76,29 @@ async function makeAuthenticatedRequest(endpoint, method = 'GET', body = null) {
 
 export const api = {
   // Inventory endpoints
-  // must provide the owner_id when fetching all items for a user
-  getAllItems: () => makeAuthenticatedRequest('/items'),
+  getAllItems: () => makeAuthenticatedRequest("/items"),
   getUserItems: (ownerId) => makeAuthenticatedRequest(`/items/owner/${ownerId}`),
   fetchItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`),
-  createItem: (itemData) => makeAuthenticatedRequest('/items', 'POST', itemData),
-  updateItem: (itemId, updates) => makeAuthenticatedRequest(`/items/${itemId}`, 'PATCH', updates),
-  updateItemQuantity: (itemId, quantity) => makeAuthenticatedRequest(`/items/${itemId}`, 'PUT', { quantity }),
-  deleteItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`, 'DELETE'),
+  createItem: (itemData) => makeAuthenticatedRequest("/items", "POST", itemData),
+  updateItem: (itemId, updates) => makeAuthenticatedRequest(`/items/${itemId}`, "PATCH", updates),
+  updateItemQuantity: (itemId, quantity) => makeAuthenticatedRequest(`/items/${itemId}`, "PUT", { quantity }),
+  deleteItem: (itemId) => makeAuthenticatedRequest(`/items/${itemId}`, "DELETE"),
 
   // Marketplace endpoints
-  getMarketplaceItems: () => makeAuthenticatedRequest('/marketplace'),
-  createMarketplaceItem: (itemData) => makeAuthenticatedRequest('/marketplace', 'POST', itemData),
-  updateMarketplaceItem: (itemId, updates) => makeAuthenticatedRequest(`/marketplace/${itemId}`, 'PATCH', updates),
+  getMarketplaceItems: () => makeAuthenticatedRequest("/marketplace"),
+  createMarketplaceItem: (itemData) => makeAuthenticatedRequest("/marketplace", "POST", itemData),
+  updateMarketplaceItem: (itemId, updates) => makeAuthenticatedRequest(`/marketplace/${itemId}`, "PATCH", updates),
   fetchMarketplaceItem: (id) => makeAuthenticatedRequest(`/marketplace/${id}`),
 
   // Notification endpoints
   getNotifications: (userId) => makeAuthenticatedRequest(`/notifications/${userId}`),
-  markNotificationRead: (notifId) => makeAuthenticatedRequest(`/notifications/${notifId}/mark-read`, 'PATCH'),
+  markNotificationRead: (notifId) => makeAuthenticatedRequest(`/notifications/${notifId}/mark-read`, "PATCH"),
 
   // Equipment endpoints
-  createEquipment: (equipmentData) => makeAuthenticatedRequest('/equipment', 'POST', equipmentData),
-  getAllEquipment: () => makeAuthenticatedRequest('/equipment'),
+  createEquipment: (equipmentData) => makeAuthenticatedRequest("/equipment", "POST", equipmentData),
+  getAllEquipment: () => makeAuthenticatedRequest("/equipment"),
   getEquipment: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}`),
-  getEquipmentLogs: () => makeAuthenticatedRequest('/equipment/log'),
-  checkIn: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}/checkin`, 'PATCH'),
-  checkOut: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}/checkout`, 'PATCH'),
+  getEquipmentLogs: () => makeAuthenticatedRequest("/equipment/log"),
+  checkIn: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}/checkin`, "PATCH"),
+  checkOut: (equipmentId) => makeAuthenticatedRequest(`/equipment/${equipmentId}/checkout`, "PATCH"),
 };

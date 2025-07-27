@@ -3,7 +3,7 @@ from datetime import datetime, date
 from werkzeug.utils import secure_filename
 
 from models import Item, db
-from auth.auth_helper import login_required
+from user_auth.auth_helper import login_required
 
 from supabase_storage import upload_file_to_supabase
 
