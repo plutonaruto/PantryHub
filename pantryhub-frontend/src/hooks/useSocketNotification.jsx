@@ -3,9 +3,10 @@ import { io } from "socket.io-client";
 import { useNotifications } from "../context/NotificationContext";
 import { toast } from "react-hot-toast";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
-const socket = io(SOCKET_URL, {
-    transports: ["websocket", "polling"],
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+export const socket = io(SOCKET_URL, {
+  path: "/socket.io",
+  transports: ["websocket", "polling"]
 });
 
 function useSocketNotification() {
