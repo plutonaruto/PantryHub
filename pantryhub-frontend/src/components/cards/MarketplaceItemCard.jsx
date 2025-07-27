@@ -10,7 +10,7 @@ export default function MarketplaceItemCard({ item, onClaim }) {
   const { user } = useAuth();
 
   const isOwner = user?.uid === item.owner_id;
-  const isAdmin = user?.isAdmin; // assuming you set this after login
+  const isAdmin = user?.role === "admin"; 
 
   const handleDelete = async () => {
     const confirm = window.confirm("Are you sure you want to delete this item?");

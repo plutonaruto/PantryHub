@@ -1,6 +1,8 @@
 from functools import wraps
 from flask import request, jsonify, g, current_app
 from firebase_admin import auth as firebase_auth
+from firebase_admin import firestore  
+db = firestore.client() 
 
 def verify_token_internal():
     if current_app.debug:
@@ -15,11 +17,18 @@ def verify_token_internal():
     id_token = parts[1]
     try:
         decoded = firebase_auth.verify_id_token(id_token)
-        g.user_id = decoded["uid"]
+        uid = decoded["uid"]
+
+        user_doc = db.collection("users").document(uid).get()
+        user_data = user_doc.to_dict() if user_doc.exists else {}
+
+        role = user_data.get("role", "user")
+
+        g.user_id = uid
         g.current_user = {
-            "uid": decoded["uid"],
+            "uid": uid,
             "email": decoded.get("email"),
-            "role": decoded.get("role", "user")
+            "role": role
         }
         return decoded, None, None
     except Exception as e:

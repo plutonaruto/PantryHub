@@ -89,6 +89,7 @@ export const api = {
   createMarketplaceItem: (itemData) => makeAuthenticatedRequest("/marketplace", "POST", itemData),
   updateMarketplaceItem: (itemId, updates) => makeAuthenticatedRequest(`/marketplace/${itemId}`, "PATCH", updates),
   fetchMarketplaceItem: (id) => makeAuthenticatedRequest(`/marketplace/${id}`),
+  deleteMarketplaceItem: (itemId) => makeAuthenticatedRequest(`/marketplace/${itemId}`, "DELETE"),
 
   // Notification endpoints
   getNotifications: (userId) => makeAuthenticatedRequest(`/notifications/${userId}`),
