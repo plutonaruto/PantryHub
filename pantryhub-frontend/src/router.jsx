@@ -13,6 +13,7 @@ import Equipment from "./pages/Equipment";
 import EquipmentPage from "./pages/EquipmentPage";
 import EquipmentLog from "./pages/EquipmentLog";
 import Notifications from "./pages/Notifications";
+import RecipePage from "./pages/RecipePage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <ProtectedRoute> <Inventory /> </ProtectedRoute>} ,
