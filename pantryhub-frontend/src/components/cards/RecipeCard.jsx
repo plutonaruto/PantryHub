@@ -1,3 +1,4 @@
+import SaveToPlannerDropdown from "../shared/SaveToPlannerDropdown";
 export default function RecipeCard({ recipe, onUnsave, onView, onSave }) {
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
@@ -15,13 +16,15 @@ export default function RecipeCard({ recipe, onUnsave, onView, onSave }) {
       </div>
 
       <div className="flex gap-2 mt-2">
-        {onView && (
-          <button
-            className="flex-1 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
-            onClick={onView}
+        {recipe.url && (
+          <a
+            href={recipe.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 px-4 py-2 bg-secondary text-white text-center rounded hover:bg-secondary-dark"
           >
-            See Full Recipe
-          </button>
+            View Full Recipe
+          </a>
         )}
         {onSave && (
           <button
@@ -38,6 +41,9 @@ export default function RecipeCard({ recipe, onUnsave, onView, onSave }) {
           >
             Unsave
           </button>
+        )}
+        {onPlannerSave && (
+          <SaveToPlannerDropdown onSave={(day) => onPlannerSave(day)} />
         )}
       </div>
     </div>

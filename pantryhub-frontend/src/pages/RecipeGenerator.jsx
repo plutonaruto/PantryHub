@@ -1,14 +1,16 @@
 import { useState } from "react";
 import LayoutWrapper from "../components/layout/LayoutWrapper";
 import HeroBanner from "../components/layout/HeroBanner";
-import RecipeCard from "../components/cards/RecipeCard";
 import { useRecipe } from "../context/RecipeContext";
+import { usePlanner } from "../hooks/usePlanner";
+import SaveToPlannerDropdown from "../components/shared/SaveToPlannerDropdown";
 
 export default function RecipeGenerator() {
   const [ingredientInput, setIngredientInput] = useState("");
   const [generatedRecipes, setGeneratedRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const { savedRecipes, setSavedRecipes } = useRecipe();
+  const { addRecipeToDay } = usePlanner();
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
@@ -20,18 +22,22 @@ export default function RecipeGenerator() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const response = await fetch(`${API_BASE_URL}/api/generate-recipes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ingredients }),
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/generate-recipes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredients }),
+      });
 
-    const data = await response.json();
-    if (data.recipes && Array.isArray(data.recipes)) {
-      setGeneratedRecipes(data.recipes);
-    } else {
-      console.error("Invalid recipes response:", data);
-      setGeneratedRecipes([]);
+      const data = await response.json();
+      if (data.recipes && Array.isArray(data.recipes)) {
+        setGeneratedRecipes(data.recipes);
+      } else {
+        console.error("Invalid recipes response:", data);
+        setGeneratedRecipes([]);
+      }
+    } catch (err) {
+      console.error("Error generating recipes:", err);
     }
 
     setLoading(false);
@@ -94,17 +100,20 @@ export default function RecipeGenerator() {
                         ))}
                       </ul>
                     </div>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex flex-col gap-2 mt-2">
                       <button
-                        className={`flex-1 px-4 py-2 rounded ${
+                        className={`px-4 py-2 rounded ${
                           isSaved
                             ? "bg-primary-dark hover:bg-red-400 text-white"
                             : "bg-primary text-white hover:bg-primary-dark"
                         }`}
                         onClick={() => handleSave(recipe)}
                       >
-                        {isSaved ? "Unsave" : "Save"}
+                        {isSaved ? "Unsave" : "Save to My Recipes"}
                       </button>
+                      <SaveToPlannerDropdown
+                        onSave={(day) => addRecipeToDay(day, recipe)}
+                      />
                     </div>
                   </div>
                 );

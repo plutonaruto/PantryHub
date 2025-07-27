@@ -52,7 +52,7 @@ def try_together_ai(ingredients):
         headers = {
             "Authorization": f"Bearer {
                 api_key}",
-            "Content-Type": "recipes_bplication/json"
+            "Content-Type": "recipes_application/json"
         }
         
         payload = {
@@ -64,7 +64,14 @@ def try_together_ai(ingredients):
                 },
                 {
                     "role": "user",
-                    "content": f"Generate 5 simple recipes using: {', '.join(ingredients)}. Format: [{{\"name\": \"Recipe Name\", \"ingredients\": [\"ingredient1\", \"ingredient2\"]}}]"
+                    "content": (
+                        f"Generate 5 simple recipes using: {', '.join(ingredients)}. "
+                        "Each recipe must include:\n"
+                        "- name (string)\n"
+                        "- ingredients (list of strings)\n"
+                        "- url (string, a link to a full recipe, use a valid link like https://example.com/recipe1)\n"
+                        "Format: [{\"name\": ..., \"ingredients\": [...], \"url\": ...}]"
+                    )
                 }
             ],
             "max_tokens": 400,

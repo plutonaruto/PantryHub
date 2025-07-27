@@ -3,16 +3,17 @@ import { useNavigate } from "react-router-dom";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import HeroBanner from '../components/layout/HeroBanner';
 import RecipeCard from '../components/cards/RecipeCard';
-import { useRecipe } from '../context/RecipeContext'; // make sure you're importing from context
+import { useRecipe } from '../context/RecipeContext';
+import { usePlanner } from '../hooks/usePlanner';
 import { ChefHat } from 'lucide-react';
 
 export default function RecipePage() {
   const { savedRecipes, setSavedRecipes } = useRecipe();
+  const { mealPlan, addRecipeToDay, removeRecipeFromDay } = usePlanner();
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   const filteredRecipes = savedRecipes.filter((recipe) =>
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -21,8 +22,6 @@ export default function RecipePage() {
   const handleUnsave = (recipeIndex) => {
     setSavedRecipes((prev) => prev.filter((_, idx) => idx !== recipeIndex));
   };
-
-  const navigate = useNavigate();
 
   return (
     <LayoutWrapper
@@ -55,14 +54,44 @@ export default function RecipePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {filteredRecipes.map((recipe, index) => (
-                <RecipeCard 
-                  key={index} 
+                <RecipeCard
+                  key={index}
                   recipe={recipe}
-                  onUnsave={() => handleUnsave(index)} 
+                  onUnsave={() => handleUnsave(index)}
+                  onPlannerSave={(day) => addRecipeToDay(day, recipe)}
                 />
               ))}
             </div>
           )}
+        </section>
+
+        {/*Recipe Planner */}
+        <section className="mt-12">
+          <h2 className="text-xl font-semibold mb-4">Weekly Recipe Planner</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+            {Object.entries(mealPlan).map(([day, recipes]) => (
+              <div key={day} className="bg-white rounded shadow p-4">
+                <h3 className="font-semibold text-lg mb-2">{day}</h3>
+                {recipes.length === 0 ? (
+                  <p className="text-gray-500 italic">No recipes planned.</p>
+                ) : (
+                  <ul className="list-disc list-inside">
+                    {recipes.map((r, i) => (
+                      <li key={i} className="flex justify-between items-center">
+                        <span>{r.name}</span>
+                        <button
+                          onClick={() => removeRecipeFromDay(day, r.name)}
+                          className="text-red-500 hover:underline text-sm ml-2"
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
       </div>
     </LayoutWrapper>
