@@ -60,7 +60,11 @@ def try_together_ai(ingredients):
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are a recipe generator. Respond only with valid JSON array format. Include measurements for the ingredients"
+                    "content": (
+                        "You are a recipe generator. Return only valid, compact JSON. "
+                        "Each recipe must have: name (string), ingredients (list of strings), and instructions (string). "
+                        "Return an array of 5 complete recipes. No extra text or explanation."
+                    )
                 },
                 {
                 "role": "user",

@@ -1,26 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LayoutWrapper from "../components/layout/LayoutWrapper";
 import HeroBanner from "../components/layout/HeroBanner";
 import { useRecipe } from "../context/RecipeContext";
 import { usePlanner } from "../hooks/usePlanner";
 import SaveToPlannerDropdown from "../components/shared/SaveToPlannerDropdown";
+import { getAuth } from "firebase/auth";
 
 export default function RecipeGenerator() {
   const [ingredientInput, setIngredientInput] = useState("");
   const [generatedRecipes, setGeneratedRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [availableItems, setAvailableItems] = useState([]);
+  const [selectedInventory, setSelectedInventory] = useState([]);
   const { savedRecipes, setSavedRecipes } = useRecipe();
   const { addRecipeToDay } = usePlanner();
   const API_BASE_URL = import.meta.env.VITE_API_URL;
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        if (!user) return;
+        const token = await user.getIdToken();
+        const res = await fetch(`${API_BASE_URL}/items`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setAvailableItems(data);
+        } else {
+          console.error("Unexpected response:", data);
+        }
+      } catch (err) {
+        console.error("Error fetching inventory items:", err);
+      }
+    };
+
+    fetchItems();
+  }, [user, API_BASE_URL]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const ingredients = ingredientInput
+    const manualIngredients = ingredientInput
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
+
+    const inventoryIngredients = selectedInventory.map((item) => item.name);
+
+    const ingredients = [...manualIngredients, ...inventoryIngredients];
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/generate-recipes`, {
@@ -52,6 +86,15 @@ export default function RecipeGenerator() {
     }
   };
 
+  const toggleInventorySelect = (item) => {
+    setSelectedInventory((prev) => {
+      const exists = prev.find((i) => i.name === item.name);
+      return exists
+        ? prev.filter((i) => i.name !== item.name)
+        : [...prev, item];
+    });
+  };
+
   return (
     <LayoutWrapper showTopbar={false}>
       <div className="container mx-auto px-4 py-8">
@@ -69,7 +112,6 @@ export default function RecipeGenerator() {
               className="flex-1 border rounded px-3 py-2"
               value={ingredientInput}
               onChange={(e) => setIngredientInput(e.target.value)}
-              required
             />
             <button
               type="submit"
@@ -79,6 +121,32 @@ export default function RecipeGenerator() {
             </button>
           </form>
         </section>
+
+        {/* Inventory Selection */}
+        {availableItems.length > 0 && (
+          <section className="mb-8">
+            <h3 className="text-lg font-semibold mb-2">Or select from your inventory:</h3>
+            <div className="flex flex-wrap gap-2">
+              {availableItems.map((item, i) => {
+                const selected = selectedInventory.some((inv) => inv.name === item.name);
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => toggleInventorySelect(item)}
+                    className={`px-3 py-1 rounded border ${
+                      selected
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                  >
+                    {item.name}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Generated Recipes */}
         {Array.isArray(generatedRecipes) && generatedRecipes.length > 0 && (

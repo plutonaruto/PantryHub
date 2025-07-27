@@ -188,3 +188,24 @@ def get_marketplace_items():
             "instructions": item.instructions
         })
     return jsonify(result), 200
+
+@marketplace_bp.route('/marketplace/<int:item_id>', methods=['DELETE'])
+@login_required
+def delete_marketplace_item(item_id):
+    item = MarketplaceItem.query.get(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    user_id = g.current_user["uid"]
+    is_admin = g.current_user.get("role") == "admin"  
+
+    if item.owner_id != user_id and not is_admin:
+        return jsonify({"error": "Unauthorized to delete this item"}), 403
+
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({"message": "Item deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to delete item"}), 500

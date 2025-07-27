@@ -1,22 +1,33 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "./firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+} from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const AuthContext = createContext(); // share auth state w/ app (user, signup, login)
+const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext); //accesss authcontext (user, signup, login, logout) abt curr user
+export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => { //authprovider provides auth context to app--> wrap inside authcontext
-  const [user, setUser] = useState(null); //holds users curr info--> initally null cuz no one logged in
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);         // holds full user info
+  const [isAdmin, setIsAdmin] = useState(false);  // additional flag for admin role
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-        setUser({ ...firebaseUser, ...userDoc.data(), displayName: firebaseUser.displayName });
+        const userData = userDoc.data();
+        const mergedUser = { ...firebaseUser, ...userData, displayName: firebaseUser.displayName };
+        setUser(mergedUser);
+        setIsAdmin(userData?.role === "admin");
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
     });
     return () => unsubscribe();
@@ -29,12 +40,15 @@ export const AuthProvider = ({ children }) => { //authprovider provides auth con
         await updateProfile(userCredential.user, { displayName: userData.name });
       }
       console.log("signup button clicked");
-      await setDoc(doc(db, "users", uid), {...userData, role: "user" }).catch(err => console.error("Firestore error:", err));; 
-      // alw assign role user upon signup, manually change to admin in firestore
+      await setDoc(doc(db, "users", uid), { ...userData, role: "user" });
     });
 
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
   const logout = () => signOut(auth);
 
-  return <AuthContext.Provider value={{ user, signup, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, isAdmin, signup, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

@@ -6,6 +6,7 @@ import MarketplaceItemCard from '../components/cards/MarketplaceItemCard';
 import { useMarketplace } from '../hooks/useMarketplace';
 import { ShoppingCart, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useLocation } from "react-router-dom";
+import { useAuth } from "../firebase/AuthProvider"; 
 
 const Marketplace = () => {
   const { 
@@ -19,7 +20,7 @@ const Marketplace = () => {
     getRecentItems 
   } = useMarketplace();
 
-  
+  const { user, isAdmin } = useAuth(); 
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,7 +138,9 @@ const Marketplace = () => {
                 <MarketplaceItemCard 
                   key={item.id} 
                   item={item} 
-                  onClaim={(qty) => claimItem(index, qty)} 
+                  onClaim={(qty) => claimItem(index, qty)}
+                  currentUserId={user?.uid}
+                  isAdmin={isAdmin}
                 />
               ))}
             </div>

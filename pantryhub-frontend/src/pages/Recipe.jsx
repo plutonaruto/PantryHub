@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 import HeroBanner from '../components/layout/HeroBanner';
 import RecipeCard from '../components/cards/RecipeCard';
@@ -7,7 +7,7 @@ import { useRecipe } from '../context/RecipeContext';
 import { usePlanner } from '../hooks/usePlanner';
 import { ChefHat } from 'lucide-react';
 
-export default function RecipePage() {
+export default function Recipe() {
   const { savedRecipes, setSavedRecipes } = useRecipe();
   const { mealPlan, addRecipeToDay, removeRecipeFromDay } = usePlanner();
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,7 +16,7 @@ export default function RecipePage() {
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   const filteredRecipes = savedRecipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (recipe.name || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleUnsave = (recipeIndex) => {
@@ -65,7 +65,7 @@ export default function RecipePage() {
           )}
         </section>
 
-        {/*Recipe Planner */}
+        {/* Recipe Planner */}
         <section className="mt-12">
           <h2 className="text-xl font-semibold mb-4">Weekly Recipe Planner</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
@@ -79,18 +79,12 @@ export default function RecipePage() {
                     {recipes.map((r, i) => (
                       <li key={i} className="flex justify-between items-start gap-2">
                         <div className="flex-1">
-                          {r.url ? (
-                            <a
-                              href={r.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              {r.name}
-                            </a>
-                          ) : (
-                            <span>{r.name}</span>
-                          )}
+                          <Link
+                            to={`/recipes/${(r.name || "untitled").toLowerCase().replace(/\s+/g, "-")}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {r.name}
+                          </Link>
                         </div>
                         <button
                           onClick={() => removeRecipeFromDay(day, r.name)}
