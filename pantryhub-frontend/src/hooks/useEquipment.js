@@ -29,16 +29,15 @@ export function useEquipment() {
     formDataToSend.append('label', formData.label);
     formDataToSend.append('description', formData.description);
     formDataToSend.append('usage_instructions', formData.usage_instructions);
-    formDataToSend.append('pantry_id', 1);    // dummy data for pantry_id
+    formDataToSend.append('pantry_id', formData.pantry_id);
 
-    
   
     try {
       await api.createEquipment(formDataToSend);
     
       const data = await api.getAllEquipment();
       setItems(data);
-      setFormData({ label: '', description: '', usage_instructions: ''});
+      setFormData({ label: '', description: '', usage_instructions: '', pantry_id: ''});
     } catch (err) {
       console.error("Failed to post item to backend:", err);
     }
