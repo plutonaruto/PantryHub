@@ -44,7 +44,7 @@ def create_app():
     from api.marketplace import marketplace_bp
     from api.notifications import notifications_bp
     from api.equipment import equipment_bp
-    from api.auth import auth_bp
+    from api.auth_roles import auth_bp
     from api.recipes import recipes_bp
 
     app.register_blueprint(inventory_bp)
