@@ -52,7 +52,7 @@ def try_together_ai(ingredients):
         headers = {
             "Authorization": f"Bearer {
                 api_key}",
-            "Content-Type": "recipes_application/json"
+            "Content-Type": "application/json"
         }
         
         payload = {
@@ -63,15 +63,16 @@ def try_together_ai(ingredients):
                     "content": "You are a recipe generator. Respond only with valid JSON array format. Include measurements for the ingredients"
                 },
                 {
-                    "role": "user",
-                    "content": (
-                        f"Generate 5 simple recipes using: {', '.join(ingredients)}. "
-                        "Each recipe must include:\n"
-                        "- name (string)\n"
-                        "- ingredients (list of strings)\n"
-                        "- url (string, a link to a full recipe, use a valid link like https://example.com/recipe1)\n"
-                        "Format: [{\"name\": ..., \"ingredients\": [...], \"url\": ...}]"
-                    )
+                "role": "user",
+                "content": (
+                    f"Generate 5 simple recipes using: {', '.join(ingredients)}. "
+                    "Each recipe must include:\n"
+                    "- name (string)\n"
+                    "- ingredients (list of strings with measurements)\n"
+                    "- instructions (string with step-by-step cooking instructions)\n\n"
+                    "Respond in JSON array format like:\n"
+                    "[{\"name\": ..., \"ingredients\": [...], \"instructions\": \"...\"}]"
+                )
                 }
             ],
             "max_tokens": 400,
@@ -109,27 +110,50 @@ def create_fallback_recipes(ingredients):
     
     primary_ingredient = ingredients[0].title()
     
-    # Recipe templates 
     recipe_templates = [
         {
             "name": f"Simple {primary_ingredient} Stir-fry",
-            "ingredients": ingredients[:3] + ["vegetable oil", "salt", "black pepper", "garlic"]
+            "ingredients": ingredients[:3] + ["vegetable oil", "salt", "black pepper", "garlic"],
+            "instructions": f"1. Heat vegetable oil in a pan.\n"
+                            f"2. Add garlic and sauté until fragrant.\n"
+                            f"3. Add {primary_ingredient} and other ingredients.\n"
+                            f"4. Stir-fry for 5–7 minutes until cooked.\n"
+                            f"5. Season with salt and pepper to taste."
         },
         {
             "name": f"Fresh {primary_ingredient} Salad", 
-            "ingredients": ingredients[:2] + ["mixed greens", "olive oil", "lemon juice"]
+            "ingredients": ingredients[:2] + ["mixed greens", "olive oil", "lemon juice"],
+            "instructions": f"1. Wash and chop {primary_ingredient} and other vegetables.\n"
+                            f"2. Toss with mixed greens in a large bowl.\n"
+                            f"3. Drizzle with olive oil and lemon juice.\n"
+                            f"4. Add salt and pepper if desired.\n"
+                            f"5. Serve chilled."
         },
         {
             "name": f"Grilled {primary_ingredient}",
-            "ingredients": ingredients[:2] + ["olive oil", "herbs", "salt", "pepper"]
+            "ingredients": ingredients[:2] + ["olive oil", "herbs", "salt", "pepper"],
+            "instructions": f"1. Marinate {primary_ingredient} with olive oil, herbs, salt, and pepper.\n"
+                            f"2. Preheat the grill to medium-high heat.\n"
+                            f"3. Grill {primary_ingredient} for 4–5 minutes on each side.\n"
+                            f"4. Serve hot with a side of greens or rice."
         },
         {
             "name": f"Hearty {primary_ingredient} Soup",
-            "ingredients": ingredients[:3] + ["vegetable broth", "onion", "carrots"]
+            "ingredients": ingredients[:3] + ["vegetable broth", "onion", "carrots"],
+            "instructions": f"1. In a pot, sauté onions and carrots until soft.\n"
+                            f"2. Add {primary_ingredient} and stir for 2 minutes.\n"
+                            f"3. Pour in vegetable broth and bring to a boil.\n"
+                            f"4. Reduce heat and simmer for 15–20 minutes.\n"
+                            f"5. Season to taste and serve warm."
         },
         {
             "name": f"Baked {primary_ingredient} Delight",
-            "ingredients": ingredients[:2] + ["butter", "seasoning blend", "breadcrumbs"]
+            "ingredients": ingredients[:2] + ["butter", "seasoning blend", "breadcrumbs"],
+            "instructions": f"1. Preheat oven to 180°C (350°F).\n"
+                            f"2. Coat {primary_ingredient} in melted butter and seasoning.\n"
+                            f"3. Roll in breadcrumbs for a crispy coating.\n"
+                            f"4. Place on baking tray and bake for 20–25 minutes.\n"
+                            f"5. Let cool slightly before serving."
         }
     ]
     

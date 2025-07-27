@@ -29,6 +29,8 @@ export const router = createBrowserRouter([
   { path: "/equipment", element: <ProtectedRoute> <Equipment /> </ProtectedRoute> },
   { path : "/equipment/:id", element: <ProtectedRoute> <EquipmentPage /> </ProtectedRoute> },
   { path: "/equipment/log", element: <ProtectedRoute> <EquipmentLog /> </ProtectedRoute> },
-  { path: "/notifications", element: <ProtectedRoute><Notifications /></ProtectedRoute> }
+  { path: "/notifications", element: <ProtectedRoute><Notifications /></ProtectedRoute> },
+  { path: "/recipes/:id", element: <RecipePage /> }
+
 ]);
 

@@ -1,5 +1,7 @@
-import SaveToPlannerDropdown from "../shared/SaveToPlannerDropdown";
-export default function RecipeCard({ recipe, onUnsave, onView, onSave }) {
+import SaveToPlannerDropdown from "../shared/saveToPlannerDropdown";
+import { Link } from "react-router-dom";
+
+export default function RecipeCard({ recipe, onUnsave, onView, onSave, onPlannerSave }) {
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
       <div>
@@ -16,16 +18,11 @@ export default function RecipeCard({ recipe, onUnsave, onView, onSave }) {
       </div>
 
       <div className="flex gap-2 mt-2">
-        {recipe.url && (
-          <a
-            href={recipe.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 px-4 py-2 bg-secondary text-white text-center rounded hover:bg-secondary-dark"
-          >
+        <Link to={`/recipes/${recipe.title.toLowerCase().replace(/\s+/g, "-")}`}>
+          <button className="mt-2 px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
             View Full Recipe
-          </a>
-        )}
+          </button>
+        </Link>
         {onSave && (
           <button
             className="flex-1 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
@@ -34,17 +31,19 @@ export default function RecipeCard({ recipe, onUnsave, onView, onSave }) {
             Save
           </button>
         )}
-        {onUnsave && (
-          <button
-            className="flex-1 px-4 py-2 bg-primary text-white rounded hover:bg-red-400"
-            onClick={onUnsave}
-          >
-            Unsave
-          </button>
-        )}
-        {onPlannerSave && (
-          <SaveToPlannerDropdown onSave={(day) => onPlannerSave(day)} />
-        )}
+        <div className="flex flex-col gap-2 mt-2">
+          {onUnsave && (
+            <button
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-red-400"
+              onClick={onUnsave}
+            >
+              Unsave
+            </button>
+          )}
+          {typeof onPlannerSave === "function" && (
+            <SaveToPlannerDropdown onSave={onPlannerSave} />
+          )}
+        </div>
       </div>
     </div>
   );

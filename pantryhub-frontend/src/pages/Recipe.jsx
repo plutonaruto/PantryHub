@@ -77,8 +77,21 @@ export default function RecipePage() {
                 ) : (
                   <ul className="list-disc list-inside">
                     {recipes.map((r, i) => (
-                      <li key={i} className="flex justify-between items-center">
-                        <span>{r.name}</span>
+                      <li key={i} className="flex justify-between items-start gap-2">
+                        <div className="flex-1">
+                          {r.url ? (
+                            <a
+                              href={r.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {r.name}
+                            </a>
+                          ) : (
+                            <span>{r.name}</span>
+                          )}
+                        </div>
                         <button
                           onClick={() => removeRecipeFromDay(day, r.name)}
                           className="text-red-500 hover:underline text-sm ml-2"
