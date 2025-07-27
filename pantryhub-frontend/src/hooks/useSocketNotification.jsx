@@ -3,7 +3,8 @@ import { io } from "socket.io-client";
 import { useNotifications } from "../context/NotificationContext";
 import { toast } from "react-hot-toast";
 
-const socket = io("https://pantryhub.onrender.com"|| "http://localhost:3000");
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+const socket     = io(SOCKET_URL);
 
 function useSocketNotification() {
     const { fetchNotifications } = useNotifications();
