@@ -1,4 +1,4 @@
-import SaveToPlannerDropdown from "../shared/saveToPlannerDropdown";
+import SaveToPlannerDropdown from "../shared/SaveToPlannerDropdown";
 import { Link } from "react-router-dom";
 
 export default function RecipeCard({ recipe, onUnsave, onView, onSave, onPlannerSave }) {

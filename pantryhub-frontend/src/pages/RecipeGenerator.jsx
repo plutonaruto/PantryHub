@@ -3,7 +3,7 @@ import LayoutWrapper from "../components/layout/LayoutWrapper";
 import HeroBanner from "../components/layout/HeroBanner";
 import { useRecipe } from "../context/RecipeContext";
 import { usePlanner } from "../hooks/usePlanner";
-import SaveToPlannerDropdown from "../components/shared/saveToPlannerDropdown";
+import SaveToPlannerDropdown from "../components/shared/SaveToPlannerDropdown";
 
 export default function RecipeGenerator() {
   const [ingredientInput, setIngredientInput] = useState("");
