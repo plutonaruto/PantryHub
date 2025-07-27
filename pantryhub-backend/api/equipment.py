@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, g
 from datetime import datetime
 from models import Equipment, EquipmentLog, Notification,db
-from auth.auth_helper import login_required
+from user_auth.auth_helper import login_required
 
 equipment_bp = Blueprint("equipment", __name__)
 

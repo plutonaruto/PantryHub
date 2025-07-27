@@ -3,7 +3,7 @@ from models import MarketplaceItem, Notification, db
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from supabase_storage import upload_file_to_supabase  # keep this import here
-from auth.auth_helper import login_required
+from user_auth.auth_helper import login_required
 
 marketplace_bp = Blueprint('marketplace', __name__)
 

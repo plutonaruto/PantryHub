@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, g
 from datetime import datetime, date
 from models import Notification, Item, db
-from auth.auth_helper import login_required
+from user_auth.auth_helper import login_required
 
 notifications_bp = Blueprint("notifications", __name__)
 
