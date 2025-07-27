@@ -1,6 +1,5 @@
 import os
 from flask import Flask, send_from_directory
-from flask_migrate import Migrate
 from flask_cors import CORS
 from dotenv import load_dotenv
 from models import db
@@ -39,7 +38,6 @@ def create_app():
     })
 
     db.init_app(app)
-    Migrate(app, db)
 
     # register bps
     from api.inventory import inventory_bp
