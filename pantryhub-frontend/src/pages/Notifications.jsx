@@ -1,10 +1,8 @@
 import { useNotifications } from "../context/NotificationContext";
 import NotificationItem from "../components/cards/NotificationItem";
-import useSocketNotification from "../hooks/useSocketNotification";
 import LayoutWrapper from '../components/layout/LayoutWrapper';
 
 export default function Notifications() {
-  useSocketNotification(); 
   const { notifications, setNotifications, loading, error } = useNotifications();
 
   if (loading) return <div>Loading notifications...</div>;
