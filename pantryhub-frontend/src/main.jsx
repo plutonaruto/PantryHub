@@ -4,7 +4,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './router.jsx';
 import './index.css';
 import { AuthProvider } from "./firebase/AuthProvider";
-//import { MarketplaceFormProvider } from "./context/MarketplaceFormContext";
+import { MarketplaceFormProvider } from "./components/forms/MarketplaceFormContext";
 import { Toaster } from 'react-hot-toast';
 import { RecipeProvider } from './context/RecipeContext';
 import { NotificationProvider } from './context/NotificationContext.jsx';
@@ -14,10 +14,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <AuthProvider>
       <NotificationProvider>
         <RecipeProvider>
-          {/* <MarketplaceFormProvider> */}
+           <MarketplaceFormProvider> 
             <RouterProvider router={router} />
             <Toaster position="top-center" reverseOrder={false} />
-          {/* </MarketplaceFormProvider> */}
+         </MarketplaceFormProvider> 
         </RecipeProvider>
       </NotificationProvider>
     </AuthProvider>

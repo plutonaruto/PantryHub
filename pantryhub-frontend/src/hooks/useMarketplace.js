@@ -136,6 +136,7 @@ export function useMarketplace() {
     loading,
     error,
     formData,
+    setFormData,
     addItem,
     updateForm,
     claimItem,

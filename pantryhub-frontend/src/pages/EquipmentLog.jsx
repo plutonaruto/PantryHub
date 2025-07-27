@@ -1,5 +1,5 @@
-import LayoutWrapper from '../components/layout/LayoutWrapper';
-import Topbar from '../components/layout/Topbar';
+import NavBar from '../components/NavBar';
+import SearchBar from '../components/layout/SearchBar';
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
 
@@ -26,10 +26,10 @@ export default function EquipmentLog() {
 
     return (
         <div className= "flex flex-col min-h-screen w-full">
-            <LayoutWrapper
-                showTopbar={true}
+            <NavBar />
+            <SearchBar
                 searchQuery={searchQuery}
-                onSearchChange={e => setSearchQuery(e.target.value)}>
+                onSearchChange={e => setSearchQuery(e.target.value)} />
 
             
                 <div className = "text-xl font-bold text-center w-full p-8">
@@ -67,10 +67,7 @@ export default function EquipmentLog() {
 
                     )}
                 </div>
-            </LayoutWrapper>
+        </div>      
 
-        </div>
-        
-
-    )
+    );
 }

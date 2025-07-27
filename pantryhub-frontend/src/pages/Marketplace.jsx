@@ -5,23 +5,40 @@ import MarketplaceForm from '../components/forms/MarketplaceForm';
 import MarketplaceItemCard from '../components/cards/MarketplaceItemCard';
 import { useMarketplace } from '../hooks/useMarketplace';
 import { ShoppingCart, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useLocation } from "react-router-dom";
 
 const Marketplace = () => {
   const { 
     items, 
     formData, 
+    setFormData,
     addItem, 
     updateForm, 
     onImageChange,
     claimItem, 
     getRecentItems 
   } = useMarketplace();
+
   
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const recentItems = getRecentItems();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Only autofill and open form if prefill exists in location.state
+    if (location.state?.prefill) {
+      setFormData(location.state.prefill);
+      setIsFormVisible(true);
+    }
+  }, [location.state]);
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -72,7 +89,7 @@ const Marketplace = () => {
 
           <MarketplaceForm
             formData={formData}
-            onChange={updateForm}
+            onChange={handleFormChange}
             onSubmit={handleSubmit}
             onImageChange={onImageChange}
             onSuccess={() => setIsFormVisible(false)}
