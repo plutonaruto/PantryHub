@@ -61,6 +61,10 @@ def create_app():
     @app.route('/')
     def index():
         return "Backend is up"
+    
+    @app.route("/ping", methods=["GET"])
+    def ping():
+        return "pong", 200
 
     scheduler = APScheduler()
     scheduler.init_app(app)
